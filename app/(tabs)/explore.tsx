@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Platform, TextInput } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { Collapsible } from "@/components/Collapsible";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -52,6 +52,20 @@ export default function TabTwoScreen() {
         </ThemedText>
         <ProgressComponents />
       </Collapsible>
+      <Collapsible title="Cards">
+        <ThemedText style={styles.subtitle}>
+          Explore different Card below :-
+        </ThemedText>
+        <View>
+          <Text className="text-white text-5xl">Hello</Text>
+        </View>
+      </Collapsible>
+      {/* <Collapsible title="Progress Bar">
+        <ThemedText style={styles.subtitle}>
+          Explore different ProgressBar below :-
+        </ThemedText>
+        <ProgressComponents />
+      </Collapsible> */}
     </ParallaxScrollView>
   );
 }

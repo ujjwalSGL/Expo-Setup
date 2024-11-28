@@ -4,13 +4,13 @@ import { StyleSheet, View } from "react-native";
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 16,
+    height: 20,
     backgroundColor: "white",
     borderRadius: 8,
   },
   progressBar: {
-    height: 15,
-    borderRadius: 30,
+    height: 20,
+    borderRadius: 8,
   },
 });
 

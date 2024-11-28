@@ -15,15 +15,15 @@ export default function ProgressComponents() {
 
 const styles = StyleSheet.create({
   color1: {
-    backgroundColor: "#FFCCCC",
+    backgroundColor: "#FFE31A",
   },
   color2: {
-    backgroundColor: "#B3E6B3",
+    backgroundColor: "#37AFE1",
   },
   color3: {
-    backgroundColor: "#ADD8E6",
+    backgroundColor: "#859F3D",
   },
   color4: {
-    backgroundColor: "#FFFF99",
+    backgroundColor: "#FF2929",
   },
 });
