@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from "react-native";
+import { Linking, StyleSheet, Text } from "react-native";
 import { Collapsible } from "@/components/Collapsible";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -8,6 +8,10 @@ import { View } from "react-native";
 import Inputs from "@/components/Input/Inputs";
 import Buttons from "@/components/Button/Buttons";
 import ProgressComponents from "@/components/Progress/ProgressBar";
+import Input from "@/components/Input/Input";
+import { Link } from "@react-navigation/native";
+import Button from "@/components/Button/Button";
+import Cards from "@/components/Card/Cards";
 
 export default function TabTwoScreen() {
   return (
@@ -56,16 +60,8 @@ export default function TabTwoScreen() {
         <ThemedText style={styles.subtitle}>
           Explore different Card below :-
         </ThemedText>
-        <View>
-          <Text className="text-white text-5xl">Hello</Text>
-        </View>
+        <Cards />
       </Collapsible>
-      {/* <Collapsible title="Progress Bar">
-        <ThemedText style={styles.subtitle}>
-          Explore different ProgressBar below :-
-        </ThemedText>
-        <ProgressComponents />
-      </Collapsible> */}
     </ParallaxScrollView>
   );
 }

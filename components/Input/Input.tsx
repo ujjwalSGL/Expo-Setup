@@ -10,7 +10,8 @@ interface InputProps {
   keyboardType?: any;
   placeholderTextColor?: string;
   underlineColorAndroid?: string;
-  style:object;
+  style?: object;
+  className?: string;
 }
 
 const Input = ({
@@ -22,10 +23,12 @@ const Input = ({
   defaultValue,
   placeholderTextColor,
   underlineColorAndroid,
-  style
+  style,
+  className,
 }: InputProps) => {
   return (
     <TextInput
+      className={className}
       style={style}
       underlineColorAndroid={underlineColorAndroid}
       defaultValue={defaultValue}
