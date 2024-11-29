@@ -60,7 +60,7 @@ export default function TabTwoScreen() {
         <ThemedText style={styles.subtitle}>
           Explore different Card below :-
         </ThemedText>
-        <Cards />
+        <Cards/>
       </Collapsible>
     </ParallaxScrollView>
   );
