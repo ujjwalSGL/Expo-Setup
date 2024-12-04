@@ -66,7 +66,7 @@ export default function HomeScreen() {
     //   </ThemedView>
     // </ParallaxScrollView>
     <>
-    <Notes/>
+      <Notes />
     </>
   );
 }
