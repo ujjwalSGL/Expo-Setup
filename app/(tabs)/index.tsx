@@ -14,7 +14,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import Notes from "@/components/Notes/Notes";
+import Test from "@/components/Test/Test";
+import Login from "../(LoginSignUp)/Login";
+import LeaderBoard from "../(LoginSignUp)/LeaderBoard";
 export default function HomeScreen() {
   return (
     // <ParallaxScrollView
@@ -66,7 +68,9 @@ export default function HomeScreen() {
     //   </ThemedView>
     // </ParallaxScrollView>
     <>
-      <Notes />
+      {/* <Test /> */}
+      {/* <LeaderBoard/> */}
+      <Login />
     </>
   );
 }

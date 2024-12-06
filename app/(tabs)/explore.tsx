@@ -12,7 +12,7 @@ import Input from "@/components/Input/Input";
 import { Link } from "@react-navigation/native";
 import Button from "@/components/Button/Button";
 import Cards from "@/components/Card/Cards";
-import Notes from "@/components/Notes/Notes";
+import Test from "../../components/Test/Test";
 
 export default function TabTwoScreen() {
   return (
@@ -65,7 +65,7 @@ export default function TabTwoScreen() {
     //   </Collapsible> */}
 
     // </ParallaxScrollView>
-    <Notes />
+    <Test />
   );
 }
 // const styles = StyleSheet.create({

@@ -8,10 +8,10 @@ import {
   Image,
 } from "react-native";
 import React, { useState } from "react";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Link, useNavigation } from "expo-router";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 // import { RouteProp, useRoute } from "@react-navigation/native";
 
 type Subject =
@@ -19,6 +19,7 @@ type Subject =
   | "Operating System"
   | "Computer Networks"
   | "DBMS";
+
 interface subjectQuestionType {
   "Data Structure": {
     question: string;
@@ -185,8 +186,8 @@ export default function () {
       },
     ],
   };
-  const subject: Subject = "Data Structure";
-  const questions = subjectQuestions[subject];
+  // const subject: Subject = "DBMS";
+  const questions = subjectQuestions["DBMS"];
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -204,29 +205,99 @@ export default function () {
   };
 
   const handleSubmit = () => {
-    Alert.alert("Test Submitted");
+    // Alert.alert("Test Submitted");
+    <Link href="/(LoginSignUp)/LeaderBoard"></Link>;
+  };
+  const handlePageChange = (index: number) => {
+    setCurrentQuestionIndex(index);
+    setSelectedOption(null);
   };
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1">
+        <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
+          <TouchableOpacity>
+            <FontAwesome5 name="chevron-left" size={20} color="black" />
+          </TouchableOpacity>
+          <View className="flex flex-row gap-2 items-center">
+            <MaterialIcons name="access-alarm" size={24} color="red" />
+            <Text className="text-sm font-medium text-gray-400">30 Min</Text>
+          </View>
+        </View>
         <ScrollView scrollEnabled={true}>
-          <View className="flex font-semibold md:mt-8 md:mx-5 lg:mt-10 lg:mx-14 p-3 bg-white ">
-            <View className="flex justify-center items-center border-b-2 p-3 border-gray-200 mb-10">
-              <Image
-                source={require("@/assets/images/Exam.png")}
-                className="w-full"
-              />
-              {/* <Text className="mt-4 text-lg font-bold">{testName}</Text> */}
-              {/* <Text className="mt-2 text-md text-gray-600">{subject}</Text> */}
+          {/* //NavBar */}
+          <View>
+            {/* //QuestionCard */}
+            <View className="flex justify-center items-center p-3 border-gray-200 mb-2">
+              <Text className="mt-4 text-2xl font-bold">Practice test 1</Text>
+              <Text className="mt-2 text-md text-gray-600">Data Structure</Text>
             </View>
-            <View className="border-gray-300 shadow-md border-2 text-lg  rounded-md my-8 pb-12 p-4 bg-slate-100 ">
-              <Text className="font-semibold text-xl w-full">
-                Question {currentQuestionIndex + 1}: {currentQuestion.question}
+            {/* Page Navigate  */}
+            <View className="flex-row justify-center flex-wrap gap-2 mb-3 mt-3">
+              <View>
+                <TouchableOpacity onPress={handlePrev}>
+                  {/* {currentQuestionIndex !== 0 && ( */}
+                  <MaterialIcons
+                    name="chevron-left"
+                    size={20}
+                    color="black"
+                    className={`rounded-full border ${
+                      currentQuestionIndex === 0 ? "opacity-10" : ""
+                    } border-gray-500 backdrop:blur-sm p-3 mr-2 -mt-1`}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {questions.map((_, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handlePageChange(index)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                    currentQuestionIndex === index
+                      ? "bg-blue-700"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  <Text
+                    className={`text-lg font-bold ${
+                      currentQuestionIndex === index
+                        ? "text-white"
+                        : "text-black"
+                    }`}
+                  >
+                    {index + 1}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              <View>
+                <TouchableOpacity onPress={handleNext}>
+                  {/* {currentQuestionIndex !== 0 && ( */}
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="black"
+                    className={`rounded-full border ${
+                      currentQuestionIndex === questions.length - 1
+                        ? "opacity-10"
+                        : ""
+                    } border-gray-500 backdrop:blur-sm p-3 ml-2 -mt-1.5`}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/* <View className="flex flex-col items-center justify-center"></View> */}
+            <View className="border-gray-300 bg-gray-100 shadow-md border-2 text-lg rounded-2xl mx-4 my-5 pb-12 p-6">
+              <Text className="text-sm font-semibold text-gray-400">
+                QUESTION {currentQuestionIndex + 1} OF {questions.length}
               </Text>
-              <View className="gap-5 mt-8 font-bold lg:grid lg:grid-cols-2">
+              <Text className="font-medium text-xl w-full mt-2">
+                {currentQuestion.question}
+              </Text>
+              <View className="gap-4 mt-8  font-bold lg:grid lg:grid-cols-2">
                 {currentQuestion.options.map((option, index) => (
                   <TouchableOpacity
                     key={index}
@@ -234,10 +305,10 @@ export default function () {
                     className={`flex-row items-center p-2
                   ${
                     selectedOption === index
-                      ? "bg-orange-100 border border-orange-300"
+                      ? "bg-blue-100 border border-blue-300"
                       : ""
                   }
-                   rounded-md`}
+                   rounded-xl bg-white`}
                   >
                     <View
                       className={`h-5 w-5 rounded-full border-2  ${
@@ -254,49 +325,37 @@ export default function () {
               <Text className="pl-2 font-semibold text-sm hover:cursor-pointer">
                 Mark as Flag
               </Text>
-            </Text> */}
-              </View>
-            </View>
-            <View className="mt-8">
-              <Text className="text-lg font-medium">Selected Option :- </Text>
-              <Text className="font-semibold text-md border border-gray-300 bg-slate-100 rounded-md p-5 mt-1 shadow-md">
-                <Text className="font font-extrabold text-orange-400 pl-2 ">
-                  {selectedOption !== null
-                    ? currentQuestion.options[selectedOption]
-                    : "Not Selected"}
-                </Text>
-              </Text>
-            </View>
-            <View className="flex-row justify-between items-center my-10">
-              <TouchableOpacity onPress={handlePrev}>
-                {currentQuestionIndex !== 0 && (
-                  <MaterialIcons
-                    name="chevron-left"
-                    size={24}
-                    color="black"
-                    className="rounded-full bg-gray-300 p-3"
-                  />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleNext}>
-                {currentQuestionIndex === questions.length - 1 ? (
-                  <View className="bg-green-500 rounded-full ">
-                    <Text
-                      className="text-white p-4 font-semibold"
-                      onPress={handleSubmit}
-                    >
-                      <Link href="/explore" className="text-white">
-                        Submit
-                      </Link>
+              </Text> */}
+
+                {selectedOption !== null && (
+                  <View className="mt-8">
+                    <Text className="text-lg font-medium">
+                      Selected Option :-{" "}
+                    </Text>
+                    <Text className="font-semibold text-md border border-gray-300 bg-white rounded-md p-5 mt-1 shadow-md">
+                      <Text className="font font-extrabold text-blue-700 pl-2 ">
+                        {selectedOption !== null
+                          ? currentQuestion.options[selectedOption]
+                          : ""}
+                      </Text>
                     </Text>
                   </View>
-                ) : (
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={24}
-                    color="black"
-                    className="rounded-full bg-gray-300 p-3"
-                  />
+                )}
+              </View>
+            </View>
+            {/* //Question Navigate */}
+            <View className="mx-5">
+              <TouchableOpacity>
+                {currentQuestionIndex === questions.length - 1 && (
+                  <View className="bg-blue-700 rounded-xl flex items-center justify-center  mb-5">
+                    <Text
+                      className="text-white p-5 font-semibold"
+                      // onPress={handleSubmit}
+                    >
+                      <Link href={"/"}></Link>
+                      Submit
+                    </Text>
+                  </View>
                 )}
               </TouchableOpacity>
             </View>

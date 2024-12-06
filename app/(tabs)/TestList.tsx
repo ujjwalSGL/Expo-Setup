@@ -9,12 +9,10 @@ import {
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Link, router, useNavigation } from "expo-router";
-import Feather from "@expo/vector-icons/Feather";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Link, useNavigation } from "expo-router";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { CircleCheck } from "lucide-react";
-import { title } from "process";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const TestList = () => {
   const Navigation = useNavigation();
@@ -56,28 +54,41 @@ const TestList = () => {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex-1 bg-gradient-to-b from-teal-100">
-        <View className="flex flex-row justify-between gap-10 p-4 mt-4 px-10 items-center">
-          <TouchableOpacity>
-            <FontAwesome name="user-circle-o" size={32} color="black" />
+      <SafeAreaView className="flex-1">
+        <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
+          <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
+            <MaterialIcons name="menu" size={20} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Feather name="settings" size={32} color="black" />
-          </TouchableOpacity>
+          <View className="flex flex-row">
+            <TouchableOpacity>
+              <View className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md mr-3">
+                <FontAwesome5 name="book" size={20} color="black" />
+                <Text className="text-gray-400 font-medium">Topics</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity className="border border-gray-400 rounded-md p-2">
+              <FontAwesome5 name="user-alt" size={20} color="black" />
+            </TouchableOpacity>
+          </View>
         </View>
         <ScrollView scrollEnabled={true}>
-          <View className="flex justify-center items-center border-b-2 p-3 border-gray-200">
+          <View className="flex justify-center items-center p-3 border-gray-200 mt-2 mb-2">
             <Image
-              source={require("@/assets/images/Testheader.png")}
-              className="h-44 w-full opacity-60"
+              source={require("@/assets/images/TestPageHeader.png")}
+              height={12}
+              width={10}
+              className="h-16 w-16"
             />
-            <Text className="text-lg font-bold">Test Pending</Text>
+            <Text className="text-xl font-bold">Your Test is ready!</Text>
+            <Text className="text-md font-bold text-center px-5 text-gray-400">
+              Your customized test has been sucessfully generated.
+            </Text>
           </View>
-          <View className="mb-4 mt-2 gap-10 lg:grid lg:grid-cols-2">
+          <View className="mb-4 mt-2 gap-10">
             {tests.map((test) => (
               <View
                 key={test.id}
-                className="border border-gray-300 rounded-lg p-4 shadow-md mx-2 bg-gray-200 flex lg:justify-between justify-center"
+                className="border border-gray-300 rounded-lg p-4 shadow-md lg:mx-5 mx-3 bg-gray-200 flex lg:justify-between justify-center"
               >
                 {/* <View>
                   <Text className="font-semibold text-lg">{test.name}</Text>
@@ -164,20 +175,17 @@ const TestList = () => {
 
                 <View className="items-center">
                   <TouchableOpacity
-                    className="bg-blue-600 hover:bg-blue-500 text-white lg:p-3 p-3 w-full mt-4 lg:mt-0 rounded-md"
+                    className="bg-blue-700 hover:bg-blue-600 text-white lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-md"
                     onPress={() =>
-
                       // {
                       //   router.push("/explore");
                       // }
-                      {
-                        console.log("Hello");
-                      }
+                      ""
                     }
                   >
                     <Link
-                      href="/explore"
-                      className="text-white text-center font-bold"
+                    href="/explore"
+                      className="text-white text-center font-bold lg:-mt-2 "
                     >
                       <Text className="text-lg">Proceed</Text>
                       <View className="pl-2 mt-3">
