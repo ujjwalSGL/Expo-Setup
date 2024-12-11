@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, useNavigation } from "expo-router";
@@ -16,6 +17,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const TestList = () => {
   const Navigation = useNavigation();
+  const [enter, setEnter] = useState<boolean>(false);
 
   const tests = [
     {
@@ -51,6 +53,11 @@ const TestList = () => {
       subject: "DBMS",
     },
   ];
+  const handleProceed = () => {
+    console.log("Enrter");
+    Navigation.navigate("Test", { subject: test.subject });
+    setEnter(true);
+  };
 
   return (
     <SafeAreaProvider>
@@ -175,23 +182,36 @@ const TestList = () => {
 
                 <View className="items-center">
                   <TouchableOpacity
-                    className="bg-blue-700 hover:bg-blue-600 text-white lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-md"
-                    onPress={() =>
-                      // {
-                      //   router.push("/explore");
-                      // }
-                      ""
-                    }
+                    className="bg-blue-700 hover:bg-blue-600 flex-row items-center justify-center lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-md"
+                    onPress={() => {
+                      Navigation.navigate("Test", { subject: test.subject });
+                      setEnter(true);
+                    }}
                   >
-                    <Link
-                    href="/explore"
-                      className="text-white text-center font-bold lg:-mt-2 "
-                    >
-                      <Text className="text-lg">Proceed</Text>
-                      <View className="pl-2 mt-3">
+                    {/* {enter ? ( */}
+                    {/* <View className="flex-row items-center bg-green-600 hover:bg-green-500">
+                        <Text className="text-lg text-white font-semibold">
+                          Done
+                        </Text>
+                        <View className="pl-2">
+                          <AntDesign
+                            name="arrowright"
+                            size={16}
+                            color="white"
+                          />
+                        </View>
+                      </View>
+                    ) : ( */}
+                    <View className="flex-row items-center">
+                      <Text className="text-lg text-white font-semibold">
+                        Proceed
+                      </Text>
+                      <View className="pl-2">
                         <AntDesign name="arrowright" size={16} color="white" />
                       </View>
-                    </Link>
+                    </View>
+                    {/* )
+                    } */}
                   </TouchableOpacity>
                 </View>
               </View>

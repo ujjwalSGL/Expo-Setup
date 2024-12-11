@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -5,14 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Image,
 } from "react-native";
-import React, { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Link, useNavigation } from "expo-router";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-// import { RouteProp, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Subject =
   | "Data Structure"
@@ -20,31 +19,21 @@ type Subject =
   | "Computer Networks"
   | "DBMS";
 
-interface subjectQuestionType {
-  "Data Structure": {
-    question: string;
-    options: string[];
-  }[];
-  "Operating System": {
-    question: string;
-    options: string[];
-  }[];
-  "Computer Networks": {
-    question: string;
-    options: string[];
-  }[];
-  DBMS: {
+interface SubjectQuestionType {
+  [key: string]: {
     question: string;
     options: string[];
   }[];
 }
 
-export default function () {
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+export default function Test() {
+  const [selectedOption, setSelectedOption] = useState<(number | null)[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const Navigation = useNavigation();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { subject } = route.params as { subject: Subject };
 
-  const subjectQuestions: subjectQuestionType = {
+  const subjectQuestions: SubjectQuestionType = {
     "Data Structure": [
       {
         question: "Which data structure uses LIFO?",
@@ -186,40 +175,86 @@ export default function () {
       },
     ],
   };
-  // const subject: Subject = "DBMS";
-  const questions = subjectQuestions["DBMS"];
+
+  const questions = subjectQuestions[subject];
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedOption(null);
-      // console.log("Next");
+      // setSelectedOption(null);
     }
   };
+
   const handlePrev = () => {
     if (currentQuestionIndex >= 1) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
-      setSelectedOption(null);
-      // console.log("Previous");
+      // setSelectedOption(null);
+    }
+  };
+
+  const handlePageChange = (index: number) => {
+    setCurrentQuestionIndex(index);
+    // setSelectedOption(null);
+  };
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  useEffect(() => {
+    loadAnswer();
+  }, []);
+
+  const loadAnswer = async () => {
+    try {
+      const savedAnswer = await AsyncStorage.getItem(`@answers_${subject}`);
+      if (savedAnswer !== null) {
+        setSelectedOption(JSON.parse(savedAnswer));
+      } else {
+        setSelectedOption(new Array(questions.length).fill(null));
+      }
+    } catch (e) {
+      console.log("Encounter : ", e);
+    }
+  };
+
+  const storeAnswers = async (newAnswer: (number | null)[]) => {
+    try {
+      await AsyncStorage.setItem(
+        `@answers_${subject}`,
+        JSON.stringify(newAnswer)
+      );
+    } catch (e) {
+      console.log("Encountered : ", e);
     }
   };
 
   const handleSubmit = () => {
-    // Alert.alert("Test Submitted");
-    <Link href="/(LoginSignUp)/LeaderBoard"></Link>;
+    navigation.navigate("LeaderBoard" as never);
   };
-  const handlePageChange = (index: number) => {
-    setCurrentQuestionIndex(index);
-    setSelectedOption(null);
+  const handleSelectOption = (optionIndex: number) => {
+    const newSelectedOptions = [...selectedOption];
+    newSelectedOptions[currentQuestionIndex] = optionIndex;
+    setSelectedOption(newSelectedOptions);
+    storeAnswers(newSelectedOptions);
   };
+  // helper method to log all Storage in a single object
+  function logCurrentStorage() {
+    AsyncStorage.getAllKeys().then((keyArray) => {
+      AsyncStorage.multiGet(keyArray).then((keyValArray) => {
+        let myStorage: any = {};
+        for (let keyVal of keyValArray) {
+          myStorage[keyVal[0]] = keyVal[1];
+        }
 
-  const currentQuestion = questions[currentQuestionIndex];
+        console.log("CURRENT STORAGE: ", myStorage);
+      });
+    });
+  }
 
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
         <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <FontAwesome5 name="chevron-left" size={20} color="black" />
           </TouchableOpacity>
           <View className="flex flex-row gap-2 items-center">
@@ -228,18 +263,14 @@ export default function () {
           </View>
         </View>
         <ScrollView scrollEnabled={true}>
-          {/* //NavBar */}
           <View>
-            {/* //QuestionCard */}
             <View className="flex justify-center items-center p-3 border-gray-200 mb-2">
               <Text className="mt-4 text-2xl font-bold">Practice test 1</Text>
-              <Text className="mt-2 text-md text-gray-600">Data Structure</Text>
+              <Text className="mt-2 text-md text-gray-600">{subject}</Text>
             </View>
-            {/* Page Navigate  */}
             <View className="flex-row justify-center flex-wrap gap-2 mb-3 mt-3">
               <View>
                 <TouchableOpacity onPress={handlePrev}>
-                  {/* {currentQuestionIndex !== 0 && ( */}
                   <MaterialIcons
                     name="chevron-left"
                     size={20}
@@ -275,7 +306,6 @@ export default function () {
 
               <View>
                 <TouchableOpacity onPress={handleNext}>
-                  {/* {currentQuestionIndex !== 0 && ( */}
                   <MaterialIcons
                     name="chevron-right"
                     size={20}
@@ -289,7 +319,6 @@ export default function () {
                 </TouchableOpacity>
               </View>
             </View>
-            {/* <View className="flex flex-col items-center justify-center"></View> */}
             <View className="border-gray-300 bg-gray-100 shadow-md border-2 text-lg rounded-2xl mx-4 my-5 pb-12 p-6">
               <Text className="text-sm font-semibold text-gray-400">
                 QUESTION {currentQuestionIndex + 1} OF {questions.length}
@@ -301,18 +330,18 @@ export default function () {
                 {currentQuestion.options.map((option, index) => (
                   <TouchableOpacity
                     key={index}
-                    onPress={() => setSelectedOption(index)}
+                    onPress={() => handleSelectOption(index)}
                     className={`flex-row items-center p-2
-                  ${
-                    selectedOption === index
-                      ? "bg-blue-100 border border-blue-300"
-                      : ""
-                  }
-                   rounded-xl bg-white`}
+                    ${
+                      selectedOption[currentQuestionIndex] === index
+                        ? "bg-blue-100 border border-blue-300"
+                        : ""
+                    }
+                     rounded-xl bg-white`}
                   >
                     <View
                       className={`h-5 w-5 rounded-full border-2  ${
-                        selectedOption === index
+                        selectedOption[currentQuestionIndex] === index
                           ? "bg-blue-500"
                           : "border-black"
                       }`}
@@ -320,40 +349,46 @@ export default function () {
                     <Text className="pl-8 font-medium text-lg">{option}</Text>
                   </TouchableOpacity>
                 ))}
-                {/* <Text className="flex-row items-center mt-4">
-              <Ionicons name="flag" size={20} color="red" className="mt-2" />
-              <Text className="pl-2 font-semibold text-sm hover:cursor-pointer">
-                Mark as Flag
-              </Text>
-              </Text> */}
 
                 {selectedOption !== null && (
                   <View className="mt-8">
                     <Text className="text-lg font-medium">
-                      Selected Option :-{" "}
+                      Selected Option:
                     </Text>
                     <Text className="font-semibold text-md border border-gray-300 bg-white rounded-md p-5 mt-1 shadow-md">
                       <Text className="font font-extrabold text-blue-700 pl-2 ">
-                        {selectedOption !== null
-                          ? currentQuestion.options[selectedOption]
-                          : ""}
+                        {
+                          currentQuestion.options[
+                            selectedOption[currentQuestionIndex] as number
+                          ]
+                        }
                       </Text>
                     </Text>
                   </View>
                 )}
               </View>
             </View>
-            {/* //Question Navigate */}
             <View className="mx-5">
               <TouchableOpacity>
                 {currentQuestionIndex === questions.length - 1 && (
                   <View className="bg-blue-700 rounded-xl flex items-center justify-center  mb-5">
                     <Text
                       className="text-white p-5 font-semibold"
-                      // onPress={handleSubmit}
+                      onPress={handleSubmit}
                     >
-                      <Link href={"/"}></Link>
                       Submit
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity>
+                {currentQuestionIndex === questions.length - 1 && (
+                  <View className="bg-blue-700 rounded-xl flex items-center justify-center  mb-5">
+                    <Text
+                      className="text-white p-5 font-semibold"
+                      onPress={logCurrentStorage}
+                    >
+                      Check Answer
                     </Text>
                   </View>
                 )}
