@@ -12,7 +12,7 @@ import Input from "@/components/Input/Input";
 import { Link } from "@react-navigation/native";
 import Button from "@/components/Button/Button";
 import Cards from "@/components/Card/Cards";
-import Login from "../Login";
+import Login from "../(LoginSignUp)/Login";
 import LeaderBoard from "../LeaderBoard";
 import TestList from "../TestList";
 
