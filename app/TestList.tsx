@@ -6,9 +6,18 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
-
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, useNavigation } from "expo-router";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -60,22 +69,71 @@ const TestList = () => {
     setEnter(true);
   };
 
+  const insets = useSafeAreaInsets();
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom,
+    left: 12,
+    right: 12,
+  };
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
         <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
           <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
-            <MaterialIcons name="menu" size={20} color="black" />
+            <MaterialIcons name="menu" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex flex-row">
             <TouchableOpacity>
-              <View className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md mr-3">
-                <FontAwesome5 name="book" size={20} color="black" />
+              <View className="border flex flex-row border-gray-400 p-2 gap-2 justify-center items-center rounded-md mr-3">
+                <FontAwesome5 name="book" size={24} color="black" />
                 <Text className="text-gray-400 font-medium">Topics</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity className="border border-gray-400 rounded-md p-2">
-              <FontAwesome5 name="user-alt" size={20} color="black" />
+            <TouchableOpacity>
+              <View>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="default"
+                      className="border border-gray-400"
+                    >
+                      <Text>
+                        <FontAwesome5 name="user-alt" size={20} color="black" />
+                      </Text>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side={Platform.OS === "android" ? "bottom" : "top"}
+                    insets={contentInsets}
+                    className="w-60 bg-white border border-gray-300 -p-0"
+                  >
+                    <View className="text-start text-lg font-bold flex-col gap-3 justify-start">
+                      <View className="text-start text-lg font-bold flex-row gap-3 justify-start border-b border-gray-400 py-2 px-3">
+                        <Text className="text-lg font-bold">
+                          <Link href="/Profile">Profile</Link>
+                        </Text>
+                        <MaterialCommunityIcons
+                          name="face-man-profile"
+                          size={24}
+                          color="black"
+                        />
+                      </View>
+                      <View className="text-start text-lg font-bold flex-row gap-3 justify-start border-b border-gray-400 px-3 pb-2">
+                        <Text className="text-lg font-bold">
+                          <Link href="/(LoginSignUp)">Logout</Link>
+                        </Text>
+                        <MaterialIcons name="logout" size={24} color="black" />
+                      </View>
+                    </View>
+                  </PopoverContent>
+                </Popover>
+              </View>
+              {/* <View>
+                <Link href="/(profile)">
+                  <FontAwesome5 name="user-alt" size={20} color="black" />
+                </Link>
+              </View> */}
             </TouchableOpacity>
           </View>
         </View>
@@ -183,7 +241,7 @@ const TestList = () => {
 
                 <View className="items-center">
                   <TouchableOpacity
-                    className="bg-blue-700 hover:bg-blue-600 flex-row items-center justify-center lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-md"
+                    className="bg-blue-700 hover:bg-blue-600 flex-row items-center justify-center lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-full"
                     onPress={() => {
                       Navigation.navigate("Test", { subject: test.subject });
                       setEnter(true);

@@ -18,7 +18,7 @@ const LeaderBoard = () => {
           You've made it to the leaderboard! Keep up the great work!
         </Text>
         <TouchableOpacity className="w-full bg-blue-600 rounded-full py-3 px-6 active:bg-blue-700">
-          <Link href="/" asChild>
+          <Link href="/TestList" asChild>
             <View className="flex-row items-center justify-center">
               <Text className="text-white font-bold text-lg mr-2">
                 Go to Test List
