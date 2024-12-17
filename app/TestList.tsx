@@ -88,6 +88,8 @@ const TestList = () => {
           <TouchableOpacity
             className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md"
             onPress={() => {
+              console.log("Hello");
+
               Navigation.dispatch(DrawerActions.openDrawer());
             }}
           >
