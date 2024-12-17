@@ -6,6 +6,7 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ import { DrawerActions } from "@react-navigation/native";
 
 const TestList = () => {
   const Navigation = useNavigation();
+
   const [enter, setEnter] = useState<boolean>(false);
   const tests = [
     {
