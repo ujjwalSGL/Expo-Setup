@@ -7,18 +7,31 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, useNavigation } from "expo-router";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { DrawerActions } from "@react-navigation/native";
 
 const TestList = () => {
   const Navigation = useNavigation();
   const [enter, setEnter] = useState<boolean>(false);
-
   const tests = [
     {
       id: 1,
@@ -59,22 +72,109 @@ const TestList = () => {
     setEnter(true);
   };
 
+  const insets = useSafeAreaInsets();
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom,
+    left: 12,
+    right: 12,
+  };
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
         <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
-          <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
-            <MaterialIcons name="menu" size={20} color="black" />
+          <TouchableOpacity
+            className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md"
+            onPress={() => {
+              Navigation.dispatch(DrawerActions.openDrawer());
+            }}
+          >
+            <MaterialIcons name="menu" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex flex-row">
             <TouchableOpacity>
-              <View className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md mr-3">
-                <FontAwesome5 name="book" size={20} color="black" />
+              <View className="border flex flex-row border-gray-400 p-2 gap-2 justify-center items-center rounded-md mr-3">
+                <FontAwesome5 name="book" size={24} color="black" />
                 <Text className="text-gray-400 font-medium">Topics</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity className="border border-gray-400 rounded-md p-2">
-              <FontAwesome5 name="user-alt" size={20} color="black" />
+            <TouchableOpacity>
+              <View>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border border-gray-400"
+                    >
+                      <Text>
+                        <FontAwesome5 name="user-alt" size={20} color="black" />
+                      </Text>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    insets={contentInsets}
+                    className="w-64 native:w-72 bg-slate-50"
+                  >
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <Text>Test</Text>
+                      </DropdownMenuItem>
+                      {/* <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <Text>Invite users</Text>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="bg-slate-50">
+                          <Animated.View entering={FadeIn.duration(200)}>
+                            <DropdownMenuItem>
+                              <Text>Email</Text>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Text>Message</Text>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>
+                              <Text>More...</Text>
+                            </DropdownMenuItem>
+                          </Animated.View>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub> */}
+                      <DropdownMenuItem>
+                        <Text>New Test</Text>
+                        <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Link
+                        href={"https://github.com/ujjwalSGL/Expo-Setup"}
+                        target="_blank"
+                      >
+                        GitHub
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Text>Support</Text>
+                    </DropdownMenuItem>
+                    {/* <DropdownMenuItem disabled>
+                      <Text>API</Text>
+                    </DropdownMenuItem> */}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Text>
+                        <Link href="/(LoginSignUp)">Log out</Link>
+                      </Text>
+                      <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </View>
+              {/* <View>
+                <Link href="/(profile)">
+                  <FontAwesome5 name="user-alt" size={20} color="black" />
+                </Link>
+              </View> */}
             </TouchableOpacity>
           </View>
         </View>
@@ -182,7 +282,7 @@ const TestList = () => {
 
                 <View className="items-center">
                   <TouchableOpacity
-                    className="bg-blue-700 hover:bg-blue-600 flex-row items-center justify-center lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-md"
+                    className="bg-blue-700 hover:bg-blue-600 flex-row items-center justify-center lg:p-3 p-3 w-full mt-4 lg:mt-3 rounded-full"
                     onPress={() => {
                       Navigation.navigate("Test", { subject: test.subject });
                       setEnter(true);

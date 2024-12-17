@@ -12,6 +12,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Link } from "expo-router";
 
 type Subject =
   | "Data Structure"
@@ -36,12 +37,18 @@ export default function Test() {
   const subjectQuestions: SubjectQuestionType = {
     "Data Structure": [
       {
-        question: "Which data structure uses LIFO?",
-        options: ["Queue", "Stack", "Linked List", "Tree"],
+        question:
+          "A binary search tree (BST) is a data structure that maintains elements in sorted order for efficient search, insertion, and deletion operations. Each node in a BST has at most two children: a left child and a right child. The left child contains elements smaller than the node, while the right child contains elements greater than the node. This property ensures that an in-order traversal of the BST will produce elements in ascending order. Consider a BST with the following elements inserted in this order: 50, 30, 70, 20, 40, 60, 80. After insertion, the tree has a height of 2 (considering the root at height 0). Now, if the element 30 is deleted, the BST re-arranges itself to maintain its structural and property constraints. Typically, when a node with two children is deleted, it is replaced by its in-order successor or in-order predecessor to ensure that the tree remains a valid BST.If you perform a search for the element 70 in this modified BST, the search operation will compare it against nodes starting from the root and traverse the tree accordingly. The efficiency of the search operation depends on the height of the tree, which affects the worst-case time complexity of the search.What will be the structure of the BST after deleting 30, and how many comparisons will be required to search for the element 70 in the updated BST?",
+        options: [
+          "After deleting 30, the BST's in-order successor 40 replaces it. Searching for 70 requires 2 comparisons.",
+          "After deleting 30, the BST's in-order successor 40 replaces it. Searching for 70 requires 3 comparisons.",
+          "After deleting 30, the BST's in-order predecessor 20 replaces it. Searching for 70 requires 2 comparisons.",
+          "After deleting 30, the BST's in-order predecessor 20 replaces it. Searching for 70 requires 3 comparisons",
+        ],
       },
       {
-        question: "What is the time complexity of binary search?",
-        options: ["O(n)", "O(log n)", "O(n^2)", "O(1)"],
+        question: "Which data structure uses LIFO?",
+        options: ["Queue", "Stack", "Linked List", "Tree"],
       },
       {
         question: "Which of the following is not a linear data structure?",
@@ -237,163 +244,162 @@ export default function Test() {
     storeAnswers(newSelectedOptions);
   };
   // helper method to log all Storage in a single object
-  function logCurrentStorage() {
-    AsyncStorage.getAllKeys().then((keyArray) => {
-      AsyncStorage.multiGet(keyArray).then((keyValArray) => {
-        let myStorage: any = {};
-        for (let keyVal of keyValArray) {
-          myStorage[keyVal[0]] = keyVal[1];
-        }
+  // function logCurrentStorage() {
+  //   AsyncStorage.getAllKeys().then((keyArray) => {
+  //     AsyncStorage.multiGet(keyArray).then((keyValArray) => {
+  //       let myStorage: any = {};
+  //       for (let keyVal of keyValArray) {
+  //         myStorage[keyVal[0]] = keyVal[1];
+  //       }
 
-        console.log("CURRENT STORAGE: ", myStorage);
-      });
-    });
-  }
+  //       console.log("CURRENT STORAGE: ", myStorage);
+  //     });
+  //   });
+  // }
 
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
         <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <FontAwesome5 name="chevron-left" size={20} color="black" />
+          <TouchableOpacity>
+            <Link href="/TestList">
+              <FontAwesome5 name="chevron-left" size={20} color="black" />
+            </Link>
           </TouchableOpacity>
           <View className="flex flex-row gap-2 items-center">
             <MaterialIcons name="access-alarm" size={24} color="red" />
             <Text className="text-sm font-medium text-gray-400">30 Min</Text>
           </View>
         </View>
-        <ScrollView scrollEnabled={true}>
-          <View>
-            <View className="flex justify-center items-center p-3 border-gray-200 mb-2">
-              <Text className="mt-4 text-2xl font-bold">Practice test 1</Text>
-              <Text className="mt-2 text-md text-gray-600">{subject}</Text>
+        <ScrollView scrollEnabled={true} stickyHeaderIndices={[1]}>
+          <View className="flex justify-center items-center p-3 border-gray-200 mb-2">
+            <Text className="mt-4 text-2xl font-bold">Practice test 1</Text>
+            <Text className="mt-2 text-md text-gray-600">{subject}</Text>
+          </View>
+          <View className="flex-row justify-center flex-wrap gap-2 mb-3 mt-3 border bg-gray-200 mx-5 p-2 rounded-full">
+            <View>
+              <TouchableOpacity onPress={handlePrev}>
+                <MaterialIcons
+                  name="chevron-left"
+                  size={20}
+                  color="black"
+                  className={`rounded-full border ${
+                    currentQuestionIndex === 0 ? "opacity-10" : ""
+                  } border-gray-500 backdrop:blur-sm p-2 mr-1.5`}
+                />
+              </TouchableOpacity>
             </View>
-            <View className="flex-row justify-center flex-wrap gap-2 mb-3 mt-3">
-              <View>
-                <TouchableOpacity onPress={handlePrev}>
-                  <MaterialIcons
-                    name="chevron-left"
-                    size={20}
-                    color="black"
-                    className={`rounded-full border ${
-                      currentQuestionIndex === 0 ? "opacity-10" : ""
-                    } border-gray-500 backdrop:blur-sm p-3 mr-2 -mt-1`}
-                  />
-                </TouchableOpacity>
-              </View>
 
-              {questions.map((_, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handlePageChange(index)}
-                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                    currentQuestionIndex === index
-                      ? "bg-blue-700"
-                      : "bg-gray-200"
+            {questions.map((_, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => handlePageChange(index)}
+                className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                  currentQuestionIndex === index ? "bg-blue-700" : "bg-gray-200"
+                }`}
+              >
+                <Text
+                  className={`text-lg font-bold ${
+                    currentQuestionIndex === index ? "text-white" : "text-black"
                   }`}
                 >
-                  <Text
-                    className={`text-lg font-bold ${
-                      currentQuestionIndex === index
-                        ? "text-white"
-                        : "text-black"
+                  {index + 1}
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            <View>
+              <TouchableOpacity onPress={handleNext}>
+                <MaterialIcons
+                  name="chevron-right"
+                  size={20}
+                  color="black"
+                  className={`rounded-full border ${
+                    currentQuestionIndex === questions.length - 1
+                      ? "opacity-10"
+                      : ""
+                  } border-gray-500 backdrop:blur-sm p-2 ml-1.5`}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View className="border-gray-300 bg-gray-100 shadow-md border-2 text-lg rounded-2xl mx-4 my-5 pb-12 p-6">
+            <Text className="text-lg font-semibold text-gray-400">
+              QUESTION {currentQuestionIndex + 1} OF {questions.length}
+            </Text>
+            <Text className="font-medium text-xl w-full mt-2">
+              {currentQuestion.question}
+            </Text>
+            <Text className="text-lg font-semibold text-gray-400 mt-4">
+              Options :
+            </Text>
+            <View className="gap-4 mt-8 m-2 font-bold lg:grid lg:grid-cols-2">
+              {currentQuestion.options.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleSelectOption(index)}
+                  className={`flex-row items-center px-3 py-3
+                    ${
+                      selectedOption[currentQuestionIndex] === index
+                        ? "bg-blue-200 border border-blue-600"
+                        : ""
+                    }
+                     rounded-xl bg-white`}
+                >
+                  <View
+                    className={`h-5 w-5 rounded-full border-2  ${
+                      selectedOption[currentQuestionIndex] === index
+                        ? "bg-blue-700"
+                        : "border-black"
                     }`}
-                  >
-                    {index + 1}
+                  />
+                  <Text className="pl-3 px-2 font-medium text-lg">
+                    {option}
                   </Text>
                 </TouchableOpacity>
               ))}
 
-              <View>
-                <TouchableOpacity onPress={handleNext}>
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={20}
-                    color="black"
-                    className={`rounded-full border ${
-                      currentQuestionIndex === questions.length - 1
-                        ? "opacity-10"
-                        : ""
-                    } border-gray-500 backdrop:blur-sm p-3 ml-2 -mt-1.5`}
-                  />
-                </TouchableOpacity>
-              </View>
+              {selectedOption !== null && (
+                <View className="mt-8">
+                  <Text className="text-lg font-medium">Selected Option:</Text>
+                  <Text className="font-semibold text-md border border-gray-300 bg-white rounded-md p-5 mt-1 shadow-md">
+                    <Text className="font font-extrabold text-blue-700 ">
+                      {
+                        currentQuestion.options[
+                          selectedOption[currentQuestionIndex] as number
+                        ]
+                      }
+                    </Text>
+                  </Text>
+                </View>
+              )}
             </View>
-            <View className="border-gray-300 bg-gray-100 shadow-md border-2 text-lg rounded-2xl mx-4 my-5 pb-12 p-6">
-              <Text className="text-sm font-semibold text-gray-400">
-                QUESTION {currentQuestionIndex + 1} OF {questions.length}
-              </Text>
-              <Text className="font-medium text-xl w-full mt-2">
-                {currentQuestion.question}
-              </Text>
-              <View className="gap-4 mt-8  font-bold lg:grid lg:grid-cols-2">
-                {currentQuestion.options.map((option, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => handleSelectOption(index)}
-                    className={`flex-row items-center p-2
-                    ${
-                      selectedOption[currentQuestionIndex] === index
-                        ? "bg-blue-100 border border-blue-300"
-                        : ""
-                    }
-                     rounded-xl bg-white`}
+          </View>
+          <View className="mx-5">
+            <TouchableOpacity>
+              {currentQuestionIndex === questions.length - 1 && (
+                <View className="bg-blue-700 rounded-full flex items-center justify-center mb-5">
+                  <Text
+                    className="text-white text-lg p-3 font-semibold"
+                    onPress={handleSubmit}
                   >
-                    <View
-                      className={`h-5 w-5 rounded-full border-2  ${
-                        selectedOption[currentQuestionIndex] === index
-                          ? "bg-blue-500"
-                          : "border-black"
-                      }`}
-                    />
-                    <Text className="pl-8 font-medium text-lg">{option}</Text>
-                  </TouchableOpacity>
-                ))}
-
-                {selectedOption !== null && (
-                  <View className="mt-8">
-                    <Text className="text-lg font-medium">
-                      Selected Option:
-                    </Text>
-                    <Text className="font-semibold text-md border border-gray-300 bg-white rounded-md p-5 mt-1 shadow-md">
-                      <Text className="font font-extrabold text-blue-700 pl-2 ">
-                        {
-                          currentQuestion.options[
-                            selectedOption[currentQuestionIndex] as number
-                          ]
-                        }
-                      </Text>
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-            <View className="mx-5">
-              <TouchableOpacity>
+                    Submit
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            {/* <TouchableOpacity>
                 {currentQuestionIndex === questions.length - 1 && (
-                  <View className="bg-blue-700 rounded-xl flex items-center justify-center  mb-5">
+                  <View className="bg-blue-700 rounded-full flex items-center justify-center mb-5">
                     <Text
-                      className="text-white p-5 font-semibold"
-                      onPress={handleSubmit}
-                    >
-                      Submit
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity>
-                {currentQuestionIndex === questions.length - 1 && (
-                  <View className="bg-blue-700 rounded-xl flex items-center justify-center  mb-5">
-                    <Text
-                      className="text-white p-5 font-semibold"
+                      className="text-white text-lg p-3 font-semibold"
                       onPress={logCurrentStorage}
                     >
                       Check Answer
                     </Text>
                   </View>
                 )}
-              </TouchableOpacity>
-            </View>
+              </TouchableOpacity> */}
           </View>
         </ScrollView>
       </SafeAreaView>

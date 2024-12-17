@@ -2,8 +2,6 @@ import { View, Text, ImageBackground, TouchableOpacity } from "react-native";
 import React from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Link } from "expo-router";
-import Login from "./Login";
-import SignUp from "./SignUp";
 
 const index = () => {
   return (

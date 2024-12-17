@@ -4,6 +4,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import { PortalHost } from "@rn-primitives/portal";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -41,8 +42,11 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="Test" options={{ headerShown: false }} />
         <Stack.Screen name="Login" options={{ headerShown: false }} />
+        <Stack.Screen name="TestList" options={{ headerShown: false }} />
+        <Stack.Screen name="(profile)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
+      <PortalHost />
       <StatusBar style="auto" />
     </ThemeProvider>
   );
