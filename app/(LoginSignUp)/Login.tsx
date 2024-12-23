@@ -23,12 +23,18 @@ const Login = () => {
   const [activeState, setActiveState] = useState(false);
   const userNumber = "123";
   const userEmail = "Ujjwal@gmail.com";
+  const facultyNumber = "12345";
+  const facultyEmail = "faculty@gmail.com";
 
   const handleNavigation = () => {
     if (value === userNumber) {
       router.push("/TestList");
     } else if (value === userEmail) {
       router.push("/TestList");
+    } else if (value === facultyNumber) {
+      router.push("/AddTest");
+    } else if (value === facultyEmail) {
+      router.push("/AddTest");
     } else {
       Alert.alert("User not found");
     }

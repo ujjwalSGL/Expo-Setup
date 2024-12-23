@@ -259,7 +259,7 @@ export default function Test() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex-1">
+      <SafeAreaView className="flex-1 bg-slate-50">
         <View className="flex flex-row justify-between gap-10 p-3 lg:pt-3 pt-8 px-6 items-center border-b-2 border-gray-300">
           <TouchableOpacity>
             <Link href="/TestList">
@@ -276,7 +276,7 @@ export default function Test() {
             <Text className="mt-4 text-2xl font-bold">Practice test 1</Text>
             <Text className="mt-2 text-md text-gray-600">{subject}</Text>
           </View>
-          <View className="flex-row justify-center flex-wrap gap-2 mb-3 mt-3 border bg-gray-200 mx-5 p-2 rounded-full">
+          <View className="flex-row justify-center flex-wrap gap-2 mb-3 bg-slate-50 border-b-2 border-gray-300 p-2 ">
             <View>
               <TouchableOpacity onPress={handlePrev}>
                 <MaterialIcons
@@ -289,7 +289,6 @@ export default function Test() {
                 />
               </TouchableOpacity>
             </View>
-
             {questions.map((_, index) => (
               <TouchableOpacity
                 key={index}

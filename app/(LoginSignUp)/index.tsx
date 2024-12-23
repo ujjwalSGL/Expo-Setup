@@ -43,7 +43,7 @@ const index = () => {
           </TouchableOpacity>
           <TouchableOpacity className="bg-black border-black border-2 p-3 w-full mt-4 lg:mt-4 rounded-full mb-16">
             <View>
-              <Link href="./SignUp">
+              <Link href="/SignUp">
                 <Text className="text-xl text-white font-semibold text-center">
                   Signup
                 </Text>

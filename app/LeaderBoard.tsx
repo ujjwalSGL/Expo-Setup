@@ -17,15 +17,16 @@ const LeaderBoard = () => {
         <Text className="text-lg text-gray-600 text-center mb-6">
           You've made it to the leaderboard! Keep up the great work!
         </Text>
-        <TouchableOpacity className="w-full bg-blue-600 rounded-full py-3 px-6 active:bg-blue-700">
-          <Link href="/TestList" asChild>
-            <View className="flex-row items-center justify-center">
-              <Text className="text-white font-bold text-lg mr-2">
-                Go to Test List
-              </Text>
-              <AntDesign name="arrowright" size={16} color="white" />
+
+        <TouchableOpacity className="bg-blue-700 flex-row items-center justify-center rounded-full p-4 w-full">
+          <View className="flex-row items-center gap-2">
+            <Link href="/TestList" className="text-lg text-white font-semibold">
+              <Text>Go to TestList</Text>
+            </Link>
+            <View>
+              <AntDesign name="arrowright" size={20} color="white" />
             </View>
-          </Link>
+          </View>
         </TouchableOpacity>
       </View>
     </View>

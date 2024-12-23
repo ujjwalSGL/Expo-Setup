@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, Tabs } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -43,6 +43,8 @@ export default function RootLayout() {
         <Stack.Screen name="Test" options={{ headerShown: false }} />
         <Stack.Screen name="Login" options={{ headerShown: false }} />
         <Stack.Screen name="TestList" options={{ headerShown: false }} />
+        <Stack.Screen name="AddTest" options={{ headerShown: false }} />
+        <Stack.Screen name="(addTest)" options={{ headerShown: false }} />
         <Stack.Screen name="(profile)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
