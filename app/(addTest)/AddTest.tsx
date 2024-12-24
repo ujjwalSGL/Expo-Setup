@@ -37,7 +37,7 @@ const AddTest = () => {
   const [questionLable, setquestionLable] = useState("");
 
   const handleAddOption = () => {
-    if (mcqOption.length < 10) {
+    if (mcqOption.length < 4) {
       setMcqOption([...mcqOption, ""]);
     }
   };
@@ -65,16 +65,16 @@ const AddTest = () => {
     };
 
     try {
-      const response = await axios.post(
-        "https://f587-203-122-19-18.ngrok-free.app/addquestions",
-        newQuestion
-      );
-      console.log("Response from backend:", response.data);
-      // const currentQuestion = await AsyncStorage.getItem("questions");
-      // const questions = currentQuestion ? JSON.parse(currentQuestion) : [];
-      // questions.push(newQuestion);
-      // await AsyncStorage.setItem("questions", JSON.stringify(questions));
-      // console.log("Question added successfully");
+      // const response = await axios.post(
+      //   "https://f4e6-203-122-19-18.ngrok-free.app/addquestions",
+      //   newQuestion
+      // );
+      // console.log("Response from backend:", response.data);
+      const currentQuestion = await AsyncStorage.getItem("questions");
+      const questions = currentQuestion ? JSON.parse(currentQuestion) : [];
+      questions.push(newQuestion);
+      await AsyncStorage.setItem("questions", JSON.stringify(questions));
+      console.log("Question added successfully");
       setQuestion("");
       setAnswer("");
       setMcqOption([""]);
