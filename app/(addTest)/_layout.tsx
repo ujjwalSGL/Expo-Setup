@@ -4,6 +4,7 @@ export default function TabLayout() {
     <Stack>
       <Stack.Screen name="AddTest" options={{ headerShown: false }} />
       <Stack.Screen name="(addTest)" options={{ headerShown: false }} />
+      <Stack.Screen name="Add" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

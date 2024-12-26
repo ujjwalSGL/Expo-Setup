@@ -66,7 +66,7 @@ const AddTest = () => {
 
     try {
       // const response = await axios.post(
-      //   "https://f4e6-203-122-19-18.ngrok-free.app/addquestions",
+      //   "https://f342-203-122-19-18.ngrok-free.app/addquestions",
       //   newQuestion
       // );
       // console.log("Response from backend:", response.data);
@@ -155,6 +155,11 @@ const AddTest = () => {
           </View>
         </View>
         <ScrollView scrollEnabled={true} className="mx-4 my-4">
+          <TouchableOpacity>
+            <Link href="/Add">
+              <Text>Add</Text>
+            </Link>
+          </TouchableOpacity>
           <Text className="font-bold text-gray-500 mt-5 text-lg">Subject</Text>
           <View className="mx-1 my-4 border-2 rounded-lg text-md -p-2">
             <RNPickerSelect
@@ -246,9 +251,9 @@ const AddTest = () => {
                   value={mcqCorrectAnswer}
                   onChangeText={setMcqCorrectAnswer}
                 />
-                <TouchableOpacity className="bg-blue-600 rounded-lg flex items-center justify-center p-3">
+                {/* <TouchableOpacity className="bg-blue-600 rounded-lg flex items-center justify-center p-3">
                   <Text className="text-lg font-bold text-white">Save</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             )}
             {questionType !== "mcq" && (
