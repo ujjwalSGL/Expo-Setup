@@ -1,14 +1,13 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import {
   View,
   Text,
-  TouchableOpacity,
-  ScrollView,
   SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Pressable,
+  Modal,
   TextInput,
 } from "react-native";
-import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,87 +18,74 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import RNPickerSelect from "react-native-picker-select";
-import { Link, useNavigation } from "expo-router";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { Button } from "@/components/ui/button";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Link } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AddTest = () => {
-  const Navigation = useNavigation();
-  const [questionType, setQuestionType] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [Subject, setSubject] = useState("");
-  const [question, setQuestion] = useState("");
-  const [mcqOption, setMcqOption] = useState([""]);
-  const [mcqCorrectAnswer, setMcqCorrectAnswer] = useState("");
-  const [questionLable, setquestionLable] = useState("");
-
-  const handleAddOption = () => {
-    if (mcqOption.length < 4) {
-      setMcqOption([...mcqOption, ""]);
-    }
+  const [active, setActive] = useState(false);
+  const [examName, setExamName] = useState<string>("");
+  const [examDate, setExamDate] = useState<string>("");
+  const [duration, setDuration] = useState<string>("");
+  const [attempts, setAttempts] = useState<string>("");
+  const [tests, setTests] = useState<any[]>([]);
+  const handleAddTest = () => {
+    setActive(!active);
   };
-
-  const handleDeleteOption = () => {
-    if (mcqOption.length > 1) {
-      setMcqOption(mcqOption.slice(0, -1));
-    }
+  const next = () => {
+    const newTest = {
+      examName,
+      examDate,
+      duration,
+      attempts,
+    };
+    setTests([...tests, newTest]);
+    setExamName("");
+    setExamDate("");
+    setDuration("");
+    setAttempts("");
   };
-
-  const handleOptionChange = (text: string, index: number) => {
-    const updatedOptions = [...mcqOption];
-    updatedOptions[index] = text;
-    setMcqOption(updatedOptions);
-  };
-
   const handleAddQuestion = async () => {
-    const newQuestion = {
-      question: question,
-      type: questionType,
-      options: questionType === "mcq" ? mcqOption : [],
-      ans: questionType === "mcq" ? mcqCorrectAnswer : answer,
-      label: questionLable,
-      Subject,
+    // const newQuestion = {
+    //   question: question,
+    //   type: questionType,
+    //   options: questionType === "mcq" ? mcqOption : [],
+    //   ans: questionType === "mcq" ? mcqCorrectAnswer : answer,
+    //   label: questionLable,
+    //   Subject,
+    // };
+    const newTest = {
+      examName: examName,
+      examDate: examDate,
+      duration: duration,
+      attempts: attempts,
     };
 
     try {
-      // const response = await axios.post(
-      //   "https://f342-203-122-19-18.ngrok-free.app/addquestions",
-      //   newQuestion
-      // );
-      // console.log("Response from backend:", response.data);
-      const currentQuestion = await AsyncStorage.getItem("questions");
-      const questions = currentQuestion ? JSON.parse(currentQuestion) : [];
-      questions.push(newQuestion);
-      await AsyncStorage.setItem("questions", JSON.stringify(questions));
-      console.log("Question added successfully");
-      setQuestion("");
-      setAnswer("");
-      setMcqOption([""]);
-      setMcqCorrectAnswer("");
-      setQuestionType("");
-      setSubject("");
-      setquestionLable("");
+      const currentTest = await AsyncStorage.getItem("Test");
+      const Tests = currentTest ? JSON.parse(currentTest) : [];
+      tests.push(newTest);
+      await AsyncStorage.setItem("Tests", JSON.stringify(Tests));
+      console.log("Test added successfully");
+      setExamName("");
+      setExamDate("");
+      setDuration("");
+      setAttempts("");
     } catch (error) {
-      console.error("Error adding question:", error);
+      console.error("Error adding Test:", error);
     }
   };
-  const viewSavedQuestions = async () => {
-    try {
-      const savedQuestions = await AsyncStorage.getItem("questions");
-      const parsedQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
-      console.log("Saved Questions:", parsedQuestions);
-    } catch (error) {
-      console.error("Error retrieving questions:", error);
-    }
-  };
-
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
-        <View className="gap-40 p-3 lg:pt-3 pt-8 px-6 border-b-2 border-gray-300 flex-row justify-between items-center">
+        {/* Header> */}
+        <View className="gap-40 p-3 lg:pt-3 px-6 border-b-2 border-gray-300 flex-row justify-between items-center">
           <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
             <MaterialIcons name="menu" size={24} color="black" />
           </TouchableOpacity>
@@ -154,149 +140,203 @@ const AddTest = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <ScrollView scrollEnabled={true} className="mx-4 my-4">
-          <TouchableOpacity>
-            <Link href="/Add">
-              <Text>Add</Text>
-            </Link>
-          </TouchableOpacity>
-          <Text className="font-bold text-gray-500 mt-5 text-lg">Subject</Text>
-          <View className="mx-1 my-4 border-2 rounded-lg text-md -p-2">
-            <RNPickerSelect
-              onValueChange={(value) => setSubject(value)}
-              items={[
-                { label: "Hindi", value: "Hindi" },
-                { label: "Science", value: "Science" },
-                { label: "Social Science", value: "Social Science" },
-                { label: "Electronics", value: "Electronics" },
-                { label: "Math", value: "Math" },
-              ]}
-            />
-          </View>
-          <Text className="font-bold text-gray-500 text-lg">
-            Type Question Here
-          </Text>
-          <TextInput
-            multiline={true}
-            numberOfLines={4}
-            value={question}
-            onChangeText={setQuestion}
-            className="mx-1 my-4 pb-10 border-2 rounded-lg py-4 text-lg font-medium px-4"
-            placeholder="Type ......."
-            placeholderTextColor={"gray"}
-          />
-          <Text className="font-bold text-gray-500 mt-5 text-lg">
-            Select Answer Type
-          </Text>
-          <View className="mx-1 my-4 border-2 rounded-lg text-md ">
-            <RNPickerSelect
-              onValueChange={(value) => setQuestionType(value)}
-              items={[
-                { label: "MCQ", value: "mcq" },
-                { label: "Short Answer", value: "shortAnswer" },
-                { label: "Long Answer", value: "longAnswer" },
-              ]}
-            />
-          </View>
+
+        <ScrollView>
           <View>
-            {questionType === "mcq" && (
-              <View className="mt-4">
-                <Text className="font-bold text-gray-500 text-lg">
-                  Add MCQ Options
-                </Text>
-                {mcqOption.map((option, index) => {
-                  console.log(index);
-                  return (
-                    <View key={index} className="gap-3 mt-2">
-                      <TextInput
-                        // id={`option${index}`}
-                        className="flex-1 border-2 rounded-lg py-2 px-4 text-lg mx-1"
-                        placeholder="Enter Options . . . ."
-                        value={option}
-                        onChangeText={(text) => {
-                          handleOptionChange(text, index);
-                        }}
-                      />
-                    </View>
-                  );
-                })}
-                <View className="flex-row justify-between mx-2 my-2">
-                  <TouchableOpacity>
-                    <Text
-                      onPress={handleAddOption}
-                      className="bg-blue-600 text-white font-bold text-xl p-2 rounded-lg"
-                    >
-                      Add
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <Text
-                      onPress={handleDeleteOption}
-                      className="bg-red-600 text-white font-bold text-xl p-2 rounded-lg"
-                    >
-                      Delete
-                    </Text>
-                  </TouchableOpacity>
+            <View className="flex-row items-center justify-between mx-2 my-4">
+              <View className="flex-row items-center justify-end">
+                <Text className="text-xl font-bold mb-1"> Test List</Text>
+              </View>
+              <View>
+                <TouchableOpacity className="flex-row items-center justify-end">
+                  <Text
+                    className="text-sm bg-blue-900 rounded-md text-white p-2"
+                    onPress={handleAddTest}
+                  >
+                    + Add Test
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/* TestList */}
+            {/* <View className=" h-screen">
+              <View className="mt-5">
+                <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center bg-slate-200 justify-around gap-2 mt-1">
+                  <Text className="text-center pl-1 font-medium">
+                    Test Name
+                  </Text>
+                  <Text className="text-center font-medium">Test Date</Text>
+                  <Text className="text-center font-medium">Attempts</Text>
+                  <Text className="text-center font-medium">Marks</Text>
+                  <Text className="text-center font-medium">Edit</Text>
                 </View>
               </View>
-            )}
-            {questionType === "mcq" && (
-              <View className="gap-3 mt-2">
-                <Text className="font-bold text-gray-500 mt-5 text-lg">
-                  Correct Answer
+              <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-1">
+                <TouchableOpacity>
+                  <Text className="text-base text-center px-2">FA1</Text>
+                </TouchableOpacity>
+                <Text className="text-center">12/01/2025</Text>
+                <Text className="text-center">3</Text>
+                <Text className="text-center">50</Text>
+                <Text className="text-center">
+                  <TouchableOpacity>
+                    <FontAwesome name="edit" size={24} color="black" />
+                  </TouchableOpacity>
                 </Text>
-                <TextInput
-                  className="flex-1 border-2 rounded-lg py-2 px-4 text-lg mx-1"
-                  placeholder="Enter Correct Answer"
-                  value={mcqCorrectAnswer}
-                  onChangeText={setMcqCorrectAnswer}
-                />
-                {/* <TouchableOpacity className="bg-blue-600 rounded-lg flex items-center justify-center p-3">
-                  <Text className="text-lg font-bold text-white">Save</Text>
-                </TouchableOpacity> */}
               </View>
-            )}
-            {questionType !== "mcq" && (
-              <View className="mt-4">
-                <Text className="font-bold text-gray-500 mt-5 text-lg">
-                  Answer
+              <View className="mx-2 rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-1">
+                <TouchableOpacity>
+                  <Text className="text-base text-center px-2">FA1</Text>
+                </TouchableOpacity>
+                <Text className="text-center ">12/01/2025</Text>
+                <Text className="text-center">3</Text>
+                <Text className="text-center">50</Text>
+                <Text className="text-center">
+                  <TouchableOpacity>
+                    <FontAwesome name="edit" size={24} color="black" />
+                  </TouchableOpacity>
                 </Text>
-                <TextInput
-                  className="flex-1 border-2 rounded-lg py-2 px-4 text-lg mx-1"
-                  placeholder="Enter Answer"
-                  value={answer}
-                  onChangeText={setAnswer}
-                />
               </View>
-            )}
+              <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-1">
+                <TouchableOpacity>
+                  <Text className="text-base text-center px-2">FA1</Text>
+                </TouchableOpacity>
+                <Text className="text-center">12/01/2025</Text>
+                <Text className="text-center">3</Text>
+                <Text className="text-center">50</Text>
+                <Text className="text-center">
+                  <TouchableOpacity>
+                    <FontAwesome name="edit" size={24} color="black" />
+                  </TouchableOpacity>
+                </Text>
+              </View>
+            </View> */}
+            <View className="flex-1 bg-gray-100 p-4 mt-4">
+              <View className="mt-5">
+                <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center bg-slate-200 justify-around gap-2 mt-1">
+                  <Text className="text-center pl-1 font-medium">
+                    Test Name
+                  </Text>
+                  <Text className="text-center font-medium">Test Date</Text>
+                  <Text className="text-center font-medium">Attempts</Text>
+                  <Text className="text-center font-medium">Marks</Text>
+                  <Text className="text-center font-medium">Edit</Text>
+                </View>
+              </View>
+
+              {tests.length > 0 ? (
+                tests.map((test, index) => (
+                  <View
+                    key={index}
+                    className="mx-2 rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-2"
+                  >
+                    <Text className="text-base text-center px-2">
+                      {test.examName}
+                    </Text>
+                    <Text className="text-center">{test.examDate}</Text>
+                    <Text className="text-center">{test.duration}</Text>
+                    <Text className="text-center">{test.attempts}</Text>
+                    <Text className="text-center">
+                      <TouchableOpacity>
+                        <FontAwesome name="edit" size={24} color="black" />
+                      </TouchableOpacity>
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text className="text-center text-gray-500 mt-5">
+                  No tests added
+                </Text>
+              )}
+            </View>
+            <View>
+              {active && (
+                <Modal transparent animationType="fade" visible={active}>
+                  <Pressable
+                    className="flex-1 bg-black/50"
+                    onPress={() => handleAddTest()}
+                  />
+                  <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg min-w-96 lg:w-full p-2">
+                    <View className="flex-row justify-between items-center">
+                      <Text className="font-bold text-gray-700 text-xl px-2">
+                        Exam Instruction
+                      </Text>
+                      <TouchableOpacity
+                        className=" px-4 py-2 rounded-lg"
+                        onPress={() => handleAddTest()}
+                      >
+                        <Text className="font-bold">X</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View className="">
+                      <View className="p-3">
+                        <View className="grid grid-cols-2 gap-3">
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Exam Name <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                              placeholder="Final Exam"
+                              placeholderTextColor={"gray"}
+                              value={examName}
+                              onChangeText={setExamName}
+                            />
+                          </View>
+
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Exam Date <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
+                              placeholder="4/12/2024"
+                              placeholderTextColor={"gray"}
+                              value={examDate}
+                              onChangeText={setExamDate}
+                            />
+                          </View>
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Duration <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
+                              placeholder="1 hour 30 minutes"
+                              placeholderTextColor={"gray"}
+                              value={duration}
+                              onChangeText={setDuration}
+                            />
+                          </View>
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Attempts <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                              placeholder="3"
+                              placeholderTextColor={"gray"}
+                              value={attempts}
+                              onChangeText={setAttempts}
+                            />
+                          </View>
+                        </View>
+                        <TouchableOpacity className="flex-row justify-end items-center gap-2 mt-5">
+                          <Text
+                            className="font-medium text-lg text-white bg-blue-700 py-1.5 px-5 rounded-lg "
+                            onPress={() => next()}
+                            // href="/Question"
+                          >
+                            Next
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
+              )}
+            </View>
           </View>
-          <Text className="font-bold text-gray-500 mt-5 text-lg">
-            Select Question Label
-          </Text>
-          <View className="mx-1 my-4 border-2 rounded-lg text-md -p-2">
-            <RNPickerSelect
-              onValueChange={(value) => setquestionLable(value)}
-              items={[
-                { label: "Easy", value: "easy" },
-                { label: "Medium", value: "medium" },
-                { label: "Hard", value: "hard" },
-              ]}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={handleAddQuestion}
-            className="bg-green-600 rounded-lg flex items-center justify-center mt-10 p-3"
-          >
-            <Text className="text-lg font-bold text-white">Add Question</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={viewSavedQuestions}
-            className="bg-blue-600 rounded-lg flex items-center justify-center mt-5 p-3"
-          >
-            <Text className="text-lg font-bold text-white">
-              View Saved Questions
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>

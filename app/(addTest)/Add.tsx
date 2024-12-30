@@ -9,12 +9,6 @@ import {
 import React, { useState } from "react";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import RNPickerSelect from "react-native-picker-select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import axios from "axios";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,14 +19,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Link, useNavigation } from "expo-router";
@@ -43,15 +29,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const index = () => {
   const Navigation = useNavigation();
-  const [questionType, setQuestionType] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [Subject, setSubject] = useState("");
   const [question, setQuestion] = useState("");
   const [mcqOption, setMcqOption] = useState([""]);
   const [mcqCorrectAnswer, setMcqCorrectAnswer] = useState("");
-  const [questionLable, setquestionLable] = useState("");
   const [value, setValue] = React.useState("account");
-  const [selectedOption, setSelectedOption] = useState(null);
   const handleAddOption = () => {
     if (mcqOption.length < 4) {
       setMcqOption([...mcqOption, ""]);
@@ -70,47 +51,6 @@ const index = () => {
     setMcqOption(updatedOptions);
   };
 
-  const handleAddQuestion = async () => {
-    const newQuestion = {
-      question: question,
-      type: questionType,
-      options: questionType === "mcq" ? mcqOption : [],
-      ans: questionType === "mcq" ? mcqCorrectAnswer : answer,
-      label: questionLable,
-      Subject,
-    };
-
-    try {
-      // const response = await axios.post(
-      //   "https://f342-203-122-19-18.ngrok-free.app/addquestions",
-      //   newQuestion
-      // );
-      // console.log("Response from backend:", response.data);
-      const currentQuestion = await AsyncStorage.getItem("questions");
-      const questions = currentQuestion ? JSON.parse(currentQuestion) : [];
-      questions.push(newQuestion);
-      await AsyncStorage.setItem("questions", JSON.stringify(questions));
-      console.log("Question added successfully");
-      setQuestion("");
-      setAnswer("");
-      setMcqOption([""]);
-      setMcqCorrectAnswer("");
-      setQuestionType("");
-      setSubject("");
-      setquestionLable("");
-    } catch (error) {
-      console.error("Error adding question:", error);
-    }
-  };
-  const viewSavedQuestions = async () => {
-    try {
-      const savedQuestions = await AsyncStorage.getItem("questions");
-      const parsedQuestions = savedQuestions ? JSON.parse(savedQuestions) : [];
-      console.log("Saved Questions:", parsedQuestions);
-    } catch (error) {
-      console.error("Error retrieving questions:", error);
-    }
-  };
   const [isOpen, setIsOpen] = useState(false);
   const toggleAccordion = () => {
     setIsOpen(!isOpen);
@@ -174,16 +114,6 @@ const index = () => {
           </View>
         </View>
         <ScrollView scrollEnabled={true} className="mx-2">
-          {/* <Text className="ml-2 text-lg font-medium text-gray-700 mt-4">
-            Hey,
-          </Text>
-          <Text className="ml-4 text-3xl font-semibold text-gray-900">
-            Ujjwal
-          </Text>
-          <Text className="ml-2 text-lg font-medium flex justify-center items-center text-gray-700 mt-4">
-            Create Test
-          </Text> */}
-
           {/*Accordion*/}
 
           <View className="border border-gray-300 rounded-sm mx-3 mt-10">
@@ -259,14 +189,14 @@ const index = () => {
 
           {/*2nd Accoirdion*/}
 
-          {/*Third Accordion*/}
-
           <View className="border border-gray-300 rounded-sm mx-3 mt-0.5">
             <TouchableOpacity
               onPress={toggleAccordion}
               className="flex-row justify-between items-center p-3 border-b border-gray-300 bg-gray-200"
             >
-              <Text className="font-normal text-gray-700 text-base">Tests</Text>
+              <Text className="font-normal text-gray-700 text-base">
+                Questions
+              </Text>
               <FontAwesome
                 name={isOpen ? "chevron-up" : "chevron-down"}
                 size={14}
@@ -278,7 +208,7 @@ const index = () => {
                 <Tabs
                   value={value}
                   onValueChange={setValue}
-                  className="w-full max-w-[400px] mx-auto flex-col gap-1.5"
+                  className=" flex-col gap-1.5"
                 >
                   <TabsList className="flex-row w-full">
                     <TabsTrigger value="MCQ" className="flex-1">
@@ -291,9 +221,11 @@ const index = () => {
                       <Text>Long</Text>
                     </TabsTrigger>
                   </TabsList>
+                  {/* MCQ TAB */}
+
                   <TabsContent value="MCQ">
                     <View className="mt-4">
-                      <Text className=" text-gray-700 text-lg font-medium ">
+                      <Text className=" text-gray-700 text-sm font-medium ">
                         Question
                       </Text>
                       <View className="flex-row gap-2 justify-start items-center">
@@ -306,79 +238,64 @@ const index = () => {
                         />
                       </View>
                       <View>
-                        {value === "MCQ" && (
-                          <View className="mt-4">
-                            <Text className="font-medium">Options</Text>
-                            {mcqOption.map((option, index) => {
-                              console.log(index);
-                              return (
-                                <View key={index} className="gap-3 mt-2">
-                                  <TextInput
-                                    value={question}
-                                    onChangeText={setQuestion}
-                                    className="mt-0.5 border border-gray-400 rounded-md p-2.5 px-3 "
-                                    placeholder=""
-                                    value={option}
-                                    placeholderTextColor={"gray"}
-                                    onChangeText={(text) => {
-                                      handleOptionChange(text, index);
-                                    }}
-                                  />
-                                </View>
-                              );
-                            })}
-                            <View className="flex-row justify-between my-4">
-                              <TouchableOpacity>
-                                <Text
-                                  onPress={handleAddOption}
-                                  className="bg-blue-600 font-medium text-sm text-white p-2 rounded-lg"
-                                >
-                                  Add
-                                </Text>
-                              </TouchableOpacity>
-                              <TouchableOpacity>
-                                <Text
-                                  onPress={handleDeleteOption}
-                                  className="bg-red-600 font-medium text-sm text-white p-2 rounded-lg"
-                                >
-                                  Delete
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
+                        <View className="mt-4">
+                          <Text className="font-medium">Options</Text>
+                          {mcqOption.map((option, index) => {
+                            console.log(index);
+                            return (
+                              <View key={index} className="gap-3 mt-2">
+                                <TextInput
+                                  value={question}
+                                  onChangeText={setQuestion}
+                                  className="mt-0.5 border border-gray-400 rounded-md p-2.5 px-3 "
+                                  placeholder=""
+                                  value={option}
+                                  placeholderTextColor={"gray"}
+                                  onChangeText={(text) => {
+                                    handleOptionChange(text, index);
+                                  }}
+                                />
+                              </View>
+                            );
+                          })}
+                          <View className="flex-row justify-between my-4">
+                            <TouchableOpacity>
+                              <Text
+                                onPress={handleAddOption}
+                                className="bg-blue-600 font-medium text-sm text-white p-2 rounded-lg"
+                              >
+                                Add
+                              </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity>
+                              <Text
+                                onPress={handleDeleteOption}
+                                className="bg-red-600 font-medium text-sm text-white p-2 rounded-lg"
+                              >
+                                Delete
+                              </Text>
+                            </TouchableOpacity>
                           </View>
-                        )}
-                        {value === "MCQ" && (
-                          <View className="gap-3 mt-2">
-                            <Text className="font-medium">Answer</Text>
-                            <TextInput
-                              className="mt-0.5 border border-gray-400 rounded-md p-2.5 px-3 "
-                              placeholder="Enter Correct Answer . . . ."
-                              value={mcqCorrectAnswer}
-                              onChangeText={setMcqCorrectAnswer}
-                            />
-                          </View>
-                        )}
-                        {questionType == "trueFalse" && (
-                          <View className="mt-4">
-                            <Text className="font-bold text-gray-500 mt-5 text-lg">
-                              Answer
-                            </Text>
-                            <View className="mx-1 my-4 border-2 rounded-lg text-md -p-2">
-                              <RNPickerSelect
-                                onValueChange={(value) =>
-                                  setquestionLable(value)
-                                }
-                                items={[
-                                  { label: "True", value: "easy" },
-                                  { label: "False", value: "medium" },
-                                ]}
-                              />
-                            </View>
-                          </View>
-                        )}
+                        </View>
+                        <View className="gap-3 mt-2">
+                          <Text className="font-medium">Answer</Text>
+                          <TextInput
+                            className="mt-0.5 border border-gray-400 rounded-md p-2.5 px-3 "
+                            placeholder="Enter Correct Answer . . . ."
+                            value={mcqCorrectAnswer}
+                            onChangeText={setMcqCorrectAnswer}
+                          />
+                        </View>
                       </View>
                     </View>
+                    <TouchableOpacity className="flex-row justify-center items-center gap-2 mt-4 bg-blue-600 p-3 rounded-full">
+                      <Text className="font-medium text-sm text-white">
+                        Submit
+                      </Text>
+                    </TouchableOpacity>
                   </TabsContent>
+
+                  {/* T/F TAB */}
                   <TabsContent value="T/F">
                     <View className="mt-4">
                       <Text className=" text-gray-700 text-lg font-medium ">
@@ -394,42 +311,42 @@ const index = () => {
                         />
                       </View>
                     </View>
-                    <Text className="font-medium mb-4 mt-4">Options</Text>
-                    <TouchableOpacity className="text-sm font-medium">
-                      True
+                    <Text className="font-medium mb-1 mt-4">Options</Text>
+                    <TouchableOpacity className="text-sm font-medium mt-2 border p-2.5 px-3 rounded-lg border-gray-400">
+                      <Text className="text-sm font-medium">True</Text>{" "}
                     </TouchableOpacity>
-                    <TouchableOpacity className="text-sm font-medium mt-2">
-                      False
+                    <TouchableOpacity className="mt-2 border p-2.5 px-3 rounded-lg border-gray-400">
+                      <Text className="text-sm font-medium">False</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity className="flex-row justify-center items-center gap-2 mt-4 bg-blue-600 p-3 rounded-full">
+                      <Text className="font-medium text-sm text-white">
+                        Submit
+                      </Text>
                     </TouchableOpacity>
                   </TabsContent>
+
+                  {/* Long TAB */}
+
                   <TabsContent value="Long">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Account</CardTitle>
-                        <CardDescription>
-                          Make changes to your account here. Click save when
-                          you're done.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="gap-4 native:gap-2">
-                        <View className="gap-1">
-                          <Label nativeID="name">Name</Label>
-                          <Input
-                            aria-aria-labelledby="name"
-                            defaultValue="Pedro Duarte"
-                          />
-                        </View>
-                        <View className="gap-1">
-                          <Label nativeID="username">Username</Label>
-                          <Input id="username" defaultValue="@peduarte" />
-                        </View>
-                      </CardContent>
-                      <CardFooter>
-                        <Button>
-                          <Text>Save changes</Text>
-                        </Button>
-                      </CardFooter>
-                    </Card>
+                    <View className="mt-4">
+                      <Text className=" text-gray-700 text-lg font-medium ">
+                        Question
+                      </Text>
+                      <View className="flex-row gap-2 justify-start items-center">
+                        <TextInput
+                          value={question}
+                          onChangeText={setQuestion}
+                          className="mt-1 border border-gray-400 rounded-md p-2.5 px-3 w-full"
+                          placeholder="Enter Question"
+                          placeholderTextColor={"gray"}
+                        />
+                      </View>
+                    </View>
+                    <TouchableOpacity className="flex-row justify-center items-center gap-2 mt-4 bg-blue-600 p-3 rounded-full">
+                      <Text className="font-medium text-sm text-white">
+                        Submit
+                      </Text>
+                    </TouchableOpacity>
                   </TabsContent>
                 </Tabs>
               </View>
