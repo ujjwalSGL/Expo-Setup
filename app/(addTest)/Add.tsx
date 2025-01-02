@@ -249,11 +249,7 @@ const index = () => {
                                   onChangeText={setQuestion}
                                   className="mt-0.5 border border-gray-400 rounded-md p-2.5 px-3 "
                                   placeholder=""
-                                  value={option}
                                   placeholderTextColor={"gray"}
-                                  onChangeText={(text) => {
-                                    handleOptionChange(text, index);
-                                  }}
                                 />
                               </View>
                             );

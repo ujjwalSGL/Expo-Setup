@@ -288,7 +288,7 @@ const AddTest = () => {
             onPress={viewSavedQuestions}
             className="bg-blue-600 rounded-lg flex items-center justify-center mt-5 p-3"
           >
-            <Link href="/QuAestion">
+            <Link href="/Question">
               <Text className="text-lg font-bold text-white">
                 View Saved Questions
               </Text>

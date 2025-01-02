@@ -7,6 +7,8 @@ import {
   Pressable,
   Modal,
   TextInput,
+  Alert,
+  BackHandler,
 } from "react-native";
 import {
   DropdownMenu,
@@ -18,11 +20,15 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  GestureHandlerRootView,
+  Swipeable,
+} from "react-native-gesture-handler";
+import DateTimePicker from "react-native-ui-datepicker";
+import dayjs from "dayjs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Button } from "@/components/ui/button";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Link } from "expo-router";
@@ -31,315 +37,421 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const AddTest = () => {
   const [active, setActive] = useState(false);
   const [examName, setExamName] = useState<string>("");
-  const [examDate, setExamDate] = useState<string>("");
+  const [examDate, setExamDate] = useState(dayjs());
   const [duration, setDuration] = useState<string>("");
   const [attempts, setAttempts] = useState<string>("");
   const [tests, setTests] = useState<any[]>([]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [activeTab, setActiveTab] = useState("All Tests");
   const handleAddTest = () => {
     setActive(!active);
   };
-  const next = () => {
+
+  // Handle previous back button press
+
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     Alert.alert("Hold on!", "Are you sure you want to go back?");
+  //     if (active) {
+  //       setActive(false);
+  //       return true;
+  //     }
+  //     return false;
+  //   };
+
+  //   const backHandler = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     backAction
+  //   );
+
+  //   return () => {
+  //     backHandler.remove();
+  //   };
+  // }, [active]);
+
+  // Load Previous Data
+  useEffect(() => {
+    const loadTests = async () => {
+      try {
+        const storeTests = await AsyncStorage.getItem("Tests");
+        if (storeTests) {
+          setTests(JSON.parse(storeTests));
+        }
+      } catch (error) {
+        console.error("Error loading Tests:", error);
+      }
+    };
+    loadTests();
+  }, []);
+  const next = async () => {
     const newTest = {
       examName,
-      examDate,
+      id: new Date().getTime().toString(),
+      examDate: new Date(examDate.toISOString()).toDateString(),
       duration,
       attempts,
     };
-    setTests([...tests, newTest]);
+
+    const updatedTests = [...tests, newTest];
+    setTests(updatedTests);
     setExamName("");
-    setExamDate("");
+    setExamDate(dayjs());
     setDuration("");
     setAttempts("");
-  };
-  const handleAddQuestion = async () => {
-    // const newQuestion = {
-    //   question: question,
-    //   type: questionType,
-    //   options: questionType === "mcq" ? mcqOption : [],
-    //   ans: questionType === "mcq" ? mcqCorrectAnswer : answer,
-    //   label: questionLable,
-    //   Subject,
-    // };
-    const newTest = {
-      examName: examName,
-      examDate: examDate,
-      duration: duration,
-      attempts: attempts,
-    };
-
+    setActive(false);
     try {
-      const currentTest = await AsyncStorage.getItem("Test");
-      const Tests = currentTest ? JSON.parse(currentTest) : [];
-      tests.push(newTest);
-      await AsyncStorage.setItem("Tests", JSON.stringify(Tests));
-      console.log("Test added successfully");
-      setExamName("");
-      setExamDate("");
-      setDuration("");
-      setAttempts("");
+      await AsyncStorage.setItem("Tests", JSON.stringify(updatedTests));
+      Alert.alert("Test added successfully");
     } catch (error) {
-      console.error("Error adding Test:", error);
+      console.error("Error adding test:", error);
     }
   };
+  // Delete Test
+  const deleteTest = async (id: string) => {
+    Alert.alert("Delete Test", "Are you sure you want to delete this test?", [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: async () => {
+          const updatedTests = tests.filter((test) => test.id !== id);
+          setTests(updatedTests);
+          try {
+            await AsyncStorage.setItem("Tests", JSON.stringify(updatedTests));
+          } catch (err) {
+            console.error("Error deleting Test:", err);
+          }
+        },
+      },
+    ]);
+  };
+
+  const renderRightAction = (id: string) => {
+    return (
+      <TouchableOpacity
+        className="bg-red-500 justify-center items-center w-20 my-5 rounded-l-md rounded-r-md"
+        onPress={() => deleteTest(id)}
+      >
+        <Text className="text-white font-bold">Delete</Text>
+      </TouchableOpacity>
+    );
+  };
+  const renderLeftAction = (id: string) => {
+    return (
+      <TouchableOpacity
+        className="bg-green-500 justify-center items-center w-20 my-5 rounded-l-md rounded-r-md"
+        onPress={() => deleteTest(id)}
+      >
+        <Text className="text-white font-bold">Archive</Text>
+      </TouchableOpacity>
+    );
+  };
+  const tabs = ["All Tests", "Previous", "Upcoming"];
+  console.log("examdata", examDate);
   return (
-    <SafeAreaProvider>
-      <SafeAreaView className="flex-1">
-        {/* Header> */}
-        <View className="gap-40 p-3 lg:pt-3 px-6 border-b-2 border-gray-300 flex-row justify-between items-center">
-          <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
-            <MaterialIcons name="menu" size={24} color="black" />
-          </TouchableOpacity>
-          <View className="">
-            <TouchableOpacity>
-              <View>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="border border-gray-400"
-                    >
-                      <Text>
-                        <FontAwesome5 name="user-alt" size={20} color="black" />
-                      </Text>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 native:w-72 bg-slate-50">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <Text>Test</Text>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Text>New Test</Text>
-                        <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link
-                        href={"https://github.com/ujjwalSGL/Expo-Setup"}
-                        target="_blank"
-                      >
-                        GitHub
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Text>Support</Text>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Text>
-                        <Link href="/(LoginSignUp)">Log out</Link>
-                      </Text>
-                      <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </View>
+    <GestureHandlerRootView>
+      <SafeAreaProvider>
+        <SafeAreaView className="flex-1">
+          {/* Header> */}
+          <View className="gap-40 p-3 lg:pt-3 px-4 border-b-2 border-gray-300 flex-row justify-between items-center">
+            <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
+              <MaterialIcons name="menu" size={24} color="black" />
             </TouchableOpacity>
+            <View className="">
+              <TouchableOpacity>
+                <View>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border border-gray-400"
+                      >
+                        <Text>
+                          <FontAwesome5
+                            name="user-alt"
+                            size={20}
+                            color="black"
+                          />
+                        </Text>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64 native:w-72 bg-slate-50">
+                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <Text>Test</Text>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Text>New Test</Text>
+                          <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link
+                          href={"https://github.com/ujjwalSGL/Expo-Setup"}
+                          target="_blank"
+                        >
+                          GitHub
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Text>Support</Text>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Text>
+                          <Link href="/(LoginSignUp)">Log out</Link>
+                        </Text>
+                        <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <ScrollView>
-          <View>
-            <View className="flex-row items-center justify-between mx-2 my-4">
-              <View className="flex-row items-center justify-end">
-                <Text className="text-xl font-bold mb-1"> Test List</Text>
-              </View>
-              <View>
-                <TouchableOpacity className="flex-row items-center justify-end">
-                  <Text
-                    className="text-sm bg-blue-900 rounded-md text-white p-2"
-                    onPress={handleAddTest}
-                  >
-                    + Add Test
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            {/* TestList */}
-            {/* <View className=" h-screen">
-              <View className="mt-5">
-                <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center bg-slate-200 justify-around gap-2 mt-1">
-                  <Text className="text-center pl-1 font-medium">
-                    Test Name
-                  </Text>
-                  <Text className="text-center font-medium">Test Date</Text>
-                  <Text className="text-center font-medium">Attempts</Text>
-                  <Text className="text-center font-medium">Marks</Text>
-                  <Text className="text-center font-medium">Edit</Text>
-                </View>
-              </View>
-              <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-1">
-                <TouchableOpacity>
-                  <Text className="text-base text-center px-2">FA1</Text>
-                </TouchableOpacity>
-                <Text className="text-center">12/01/2025</Text>
-                <Text className="text-center">3</Text>
-                <Text className="text-center">50</Text>
-                <Text className="text-center">
-                  <TouchableOpacity>
-                    <FontAwesome name="edit" size={24} color="black" />
-                  </TouchableOpacity>
-                </Text>
-              </View>
-              <View className="mx-2 rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-1">
-                <TouchableOpacity>
-                  <Text className="text-base text-center px-2">FA1</Text>
-                </TouchableOpacity>
-                <Text className="text-center ">12/01/2025</Text>
-                <Text className="text-center">3</Text>
-                <Text className="text-center">50</Text>
-                <Text className="text-center">
-                  <TouchableOpacity>
-                    <FontAwesome name="edit" size={24} color="black" />
-                  </TouchableOpacity>
-                </Text>
-              </View>
-              <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-1">
-                <TouchableOpacity>
-                  <Text className="text-base text-center px-2">FA1</Text>
-                </TouchableOpacity>
-                <Text className="text-center">12/01/2025</Text>
-                <Text className="text-center">3</Text>
-                <Text className="text-center">50</Text>
-                <Text className="text-center">
-                  <TouchableOpacity>
-                    <FontAwesome name="edit" size={24} color="black" />
-                  </TouchableOpacity>
-                </Text>
-              </View>
-            </View> */}
-            <View className="flex-1 bg-gray-100 p-4 mt-4">
-              <View className="mt-5">
-                <View className="mx-2  rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center bg-slate-200 justify-around gap-2 mt-1">
-                  <Text className="text-center pl-1 font-medium">
-                    Test Name
-                  </Text>
-                  <Text className="text-center font-medium">Test Date</Text>
-                  <Text className="text-center font-medium">Attempts</Text>
-                  <Text className="text-center font-medium">Marks</Text>
-                  <Text className="text-center font-medium">Edit</Text>
-                </View>
-              </View>
-
-              {tests.length > 0 ? (
-                tests.map((test, index) => (
-                  <View
-                    key={index}
-                    className="mx-2 rounded-md py-3 border border-gray-300 flex-row grid grid-cols-5 items-center justify-around gap-2 mt-2"
-                  >
-                    <Text className="text-base text-center px-2">
-                      {test.examName}
-                    </Text>
-                    <Text className="text-center">{test.examDate}</Text>
-                    <Text className="text-center">{test.duration}</Text>
-                    <Text className="text-center">{test.attempts}</Text>
-                    <Text className="text-center">
-                      <TouchableOpacity>
-                        <FontAwesome name="edit" size={24} color="black" />
-                      </TouchableOpacity>
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <Text className="text-center text-gray-500 mt-5">
-                  No tests added
-                </Text>
-              )}
-            </View>
+          <ScrollView>
             <View>
-              {active && (
-                <Modal transparent animationType="fade" visible={active}>
-                  <Pressable
-                    className="flex-1 bg-black/50"
+              <View className="flex-row items-center justify-between mx-2 my-4">
+                <View className="flex-row items-center justify-end">
+                  <Text className="text-xl font-bold mb-1"></Text>
+                </View>
+                <View>
+                  <TouchableOpacity
+                    className="flex-row items-center justify-end"
                     onPress={() => handleAddTest()}
-                  />
-                  <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg min-w-96 lg:w-full p-2">
-                    <View className="flex-row justify-between items-center">
-                      <Text className="font-bold text-gray-700 text-xl px-2">
-                        Exam Instruction
-                      </Text>
-                      <TouchableOpacity
+                  >
+                    <Text className="text-sm bg-blue-900 rounded-md text-white p-2 ">
+                      + Add Test
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {/* TestList */}
+              <View className="flex-1 bg-gray-100 p-1">
+                <View className="mt-5">
+                  {/* <View className="flex-row justify-between items-center mx-4">
+                    <TouchableOpacity className="border-b-2 font-medium border-orange-400">
+                      <Text className="text-lg font-medium">All Tests</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity className="border-b-2 font-medium border-orange-400">
+                      <Text className="text-lg font-medium">Previous</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity className="border-b-2 font-medium border-orange-400">
+                      <Text className="text-lg font-medium">Upcoming</Text>
+                    </TouchableOpacity>
+                  </View> */}
+                  <View className="mt-5">
+                    <View className="flex-row justify-between items-center mx-4">
+                      {tabs.map((tab) => (
+                        <TouchableOpacity
+                          key={tab}
+                          onPress={() => setActiveTab(tab)}
+                          className={`border-b-2 font-medium ${
+                            activeTab === tab
+                              ? "border-orange-400"
+                              : "border-transparent"
+                          }`}
+                        >
+                          <Text
+                            className={`text-lg font-medium ${
+                              activeTab === tab
+                                ? "text-orange-400"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {tab}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+                <View className="mt-4">
+                  {tests.length > 0 ? (
+                    tests.map((test) => (
+                      <Swipeable
+                        key={test.id}
+                        renderRightActions={() => renderRightAction(test.id)}
+                        renderLeftActions={() => renderLeftAction(test.id)}
+                      >
+                        <View
+                          key={test.id}
+                          className="border border-gray-300 mb-4 rounded-lg p-4 shadow-md lg:mx-5 mx-3 bg-gray-200 flex lg:justify-between justify-center mt-4"
+                        >
+                          <View>
+                            <Text className="text-xl text-black font-semibold">
+                              {test.examName}
+                            </Text>
+                            <Text className="text-xs text-gray-400 font-medium mt-1">
+                              {test.examDate}
+                            </Text>
+                          </View>
+                          <View className="bg-white rounded-md mt-4 grid grid-cols-3">
+                            <View className="p-4 flex flex-row gap-5 justify-start  items-center border-gray-300">
+                              <View className="flex-row justify-start items-center gap-2">
+                                <Text className="text-md font-semibold text-gray-400">
+                                  Duration :
+                                </Text>
+                                <Text className="text-sm font-medium">
+                                  {test.duration}hr
+                                </Text>
+                              </View>
+                            </View>
+                            <View className="p-4 flex flex-row gap-5 justify-start  items-center border-gray-300">
+                              <View className="flex-row justify-start items-center gap-2">
+                                <Text className="text-md font-semibold  text-gray-400">
+                                  Attempts :
+                                </Text>
+                                <Text className="text-sm font-medium">
+                                  {test.attempts}
+                                </Text>
+                              </View>
+                            </View>
+                            <View className="p-4 flex flex-row gap-5 justify-start  items-center border-gray-300">
+                              <View className="flex-row justify-start items-center gap-2">
+                                <Text className="text-md font-semibold  text-gray-400">
+                                  Marks :
+                                </Text>
+                                <Text className="text-sm font-medium">100</Text>
+                              </View>
+                            </View>
+                          </View>
+                          {/* <View></View> */}
+                        </View>
+                      </Swipeable>
+                    ))
+                  ) : (
+                    <Text className="text-center text-gray-500 mt-5">
+                      No tests added
+                    </Text>
+                  )}
+                </View>
+              </View>
+              {/* Add Test Modal */}
+              <View>
+                {active && (
+                  <Modal transparent animationType="fade" visible={active}>
+                    <Pressable
+                      className="flex-1 bg-black/50"
+                      onPress={() => handleAddTest()}
+                    />
+                    <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg w-96 min-h-96 lg:w-full p-2">
+                      <View className="flex-row justify-center mt-4 items-center">
+                        <Text className="font-bold text-gray-700 text-2xl px-2">
+                          Exam Instruction
+                        </Text>
+                        {/* <TouchableOpacity
                         className=" px-4 py-2 rounded-lg"
                         onPress={() => handleAddTest()}
                       >
                         <Text className="font-bold">X</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View className="">
-                      <View className="p-3">
-                        <View className="grid grid-cols-2 gap-3">
-                          <View>
-                            <Text className="mt-3 text-base font-medium">
-                              Exam Name <Text className="text-red-500">*</Text>
-                            </Text>
-                            <TextInput
-                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
-                              placeholder="Final Exam"
-                              placeholderTextColor={"gray"}
-                              value={examName}
-                              onChangeText={setExamName}
-                            />
-                          </View>
+                      </TouchableOpacity> */}
+                      </View>
+                      <View className="">
+                        <View className="p-3">
+                          <View className="grid grid-cols-2 gap-3">
+                            <View>
+                              <Text className="mt-3 text-base font-medium">
+                                Exam Name
+                                <Text className="text-red-500">*</Text>
+                              </Text>
+                              <TextInput
+                                className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                                placeholder="Enter here ..."
+                                placeholderTextColor={"gray"}
+                                value={examName}
+                                onChangeText={setExamName}
+                              />
+                            </View>
 
-                          <View>
-                            <Text className="mt-3 text-base font-medium">
-                              Exam Date <Text className="text-red-500">*</Text>
-                            </Text>
-                            <TextInput
-                              className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
-                              placeholder="4/12/2024"
-                              placeholderTextColor={"gray"}
-                              value={examDate}
-                              onChangeText={setExamDate}
-                            />
+                            <View>
+                              <Text className="mt-3 text-base font-medium">
+                                Exam Date
+                                <Text className="text-red-500">*</Text>
+                              </Text>
+
+                              <TextInput
+                                className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                                placeholder="YYYY-MM-DD"
+                                placeholderTextColor={"gray"}
+                                value={examDate}
+                                onChangeText={setExamDate}
+                                onPress={() => setShowDatePicker(true)}
+                              />
+                              {showDatePicker && (
+                                <Modal
+                                  transparent
+                                  animationType="fade"
+                                  visible={showDatePicker}
+                                >
+                                  <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg w-96 min-h-96 lg:w-full p-2">
+                                    <DateTimePicker
+                                      mode="single"
+                                      date={examDate}
+                                      onChange={(params) => {
+                                        console.log("params", params);
+                                        setExamDate(params.date);
+                                        setShowDatePicker(false);
+                                      }}
+                                    />
+                                  </View>
+                                </Modal>
+                              )}
+                            </View>
+                            <View>
+                              <Text className="mt-3 text-base font-medium">
+                                Duration <Text className="text-red-500">*</Text>
+                              </Text>
+                              <TextInput
+                                className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
+                                placeholder="1 hour 30 minutes"
+                                placeholderTextColor={"gray"}
+                                value={duration}
+                                onChangeText={setDuration}
+                                maxLength={3}
+                              />
+                            </View>
+                            <View>
+                              <Text className="mt-3 text-base font-medium">
+                                Attempts <Text className="text-red-500">*</Text>
+                              </Text>
+                              <TextInput
+                                className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                                placeholder="3"
+                                placeholderTextColor={"gray"}
+                                value={attempts}
+                                onChangeText={setAttempts}
+                                maxLength={2}
+                              />
+                            </View>
                           </View>
-                          <View>
-                            <Text className="mt-3 text-base font-medium">
-                              Duration <Text className="text-red-500">*</Text>
-                            </Text>
-                            <TextInput
-                              className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
-                              placeholder="1 hour 30 minutes"
-                              placeholderTextColor={"gray"}
-                              value={duration}
-                              onChangeText={setDuration}
-                            />
-                          </View>
-                          <View>
-                            <Text className="mt-3 text-base font-medium">
-                              Attempts <Text className="text-red-500">*</Text>
-                            </Text>
-                            <TextInput
-                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
-                              placeholder="3"
-                              placeholderTextColor={"gray"}
-                              value={attempts}
-                              onChangeText={setAttempts}
-                            />
-                          </View>
+                          <TouchableOpacity className="flex-row justify-end items-center gap-2 mt-16">
+                            <Link
+                              className="font-medium text-lg text-white bg-blue-700 py-1.5 px-5 rounded-lg "
+                              onPress={() => next()}
+                              href="/Question"
+                            >
+                              Next
+                            </Link>
+                          </TouchableOpacity>
                         </View>
-                        <TouchableOpacity className="flex-row justify-end items-center gap-2 mt-5">
-                          <Text
-                            className="font-medium text-lg text-white bg-blue-700 py-1.5 px-5 rounded-lg "
-                            onPress={() => next()}
-                            // href="/Question"
-                          >
-                            Next
-                          </Text>
-                        </TouchableOpacity>
                       </View>
                     </View>
-                  </View>
-                </Modal>
-              )}
+                  </Modal>
+                )}
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </SafeAreaProvider>
+          </ScrollView>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 
