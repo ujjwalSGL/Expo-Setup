@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
   BackHandler,
+  PanResponder,
 } from "react-native";
 import {
   DropdownMenu,
@@ -24,8 +25,10 @@ import {
   GestureHandlerRootView,
   Swipeable,
 } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
+
 import DateTimePicker from "react-native-ui-datepicker";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -33,11 +36,12 @@ import { Button } from "@/components/ui/button";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Link } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "expo-status-bar";
 
 const AddTest = () => {
   const [active, setActive] = useState(false);
   const [examName, setExamName] = useState<string>("");
-  const [examDate, setExamDate] = useState(dayjs());
+  const [examDate, setExamDate] = useState<Dayjs | string>(dayjs());
   const [duration, setDuration] = useState<string>("");
   const [attempts, setAttempts] = useState<string>("");
   const [tests, setTests] = useState<any[]>([]);
@@ -46,28 +50,6 @@ const AddTest = () => {
   const handleAddTest = () => {
     setActive(!active);
   };
-
-  // Handle previous back button press
-
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     Alert.alert("Hold on!", "Are you sure you want to go back?");
-  //     if (active) {
-  //       setActive(false);
-  //       return true;
-  //     }
-  //     return false;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     "hardwareBackPress",
-  //     backAction
-  //   );
-
-  //   return () => {
-  //     backHandler.remove();
-  //   };
-  // }, [active]);
 
   // Load Previous Data
   useEffect(() => {
@@ -83,6 +65,7 @@ const AddTest = () => {
     };
     loadTests();
   }, []);
+
   const next = async () => {
     const newTest = {
       examName,
@@ -101,9 +84,9 @@ const AddTest = () => {
     setActive(false);
     try {
       await AsyncStorage.setItem("Tests", JSON.stringify(updatedTests));
-      Alert.alert("Test added successfully");
+      console.log("Test added successfully");
     } catch (error) {
-      console.error("Error adding test:", error);
+      console.log("Error adding test:", error);
     }
   };
   // Delete Test
@@ -149,12 +132,28 @@ const AddTest = () => {
       </TouchableOpacity>
     );
   };
-  const tabs = ["All Tests", "Previous", "Upcoming"];
+  // Gesture Navigation
+  const navigation = useNavigation();
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) =>
+      Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
+      Math.abs(gestureState.dx) > 20,
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dx > 50) {
+        navigation.goBack();
+      } else if (gestureState.dx < -50) {
+        navigation.navigate("Question");
+      }
+    },
+  });
+
+  const tabs = ["All Tests", "Ongoing", "Upcoming"];
   console.log("examdata", examDate);
   return (
     <GestureHandlerRootView>
-      <SafeAreaProvider>
-        <SafeAreaView className="flex-1">
+      <StatusBar backgroundColor="black" barStyle="light-content" />
+      <SafeAreaProvider {...panResponder.panHandlers}>
+        <SafeAreaView className="flex-1 mt-7">
           {/* Header> */}
           <View className="gap-40 p-3 lg:pt-3 px-4 border-b-2 border-gray-300 flex-row justify-between items-center">
             <TouchableOpacity className="border flex flex-row border-gray-400 p-2 gap-2 rounded-md">
@@ -183,10 +182,14 @@ const AddTest = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
                         <DropdownMenuItem>
-                          <Text>Test</Text>
+                          <Link href="/TestList" target="_blank">
+                            Test
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                          <Text>New Test</Text>
+                          <Link href="/AddTests" target="_blank">
+                            New Test
+                          </Link>
                           <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -216,237 +219,214 @@ const AddTest = () => {
             </View>
           </View>
 
-          <ScrollView>
-            <View>
-              <View className="flex-row items-center justify-between mx-2 my-4">
-                <View className="flex-row items-center justify-end">
-                  <Text className="text-xl font-bold mb-1"></Text>
-                </View>
-                <View>
-                  <TouchableOpacity
-                    className="flex-row items-center justify-end"
-                    onPress={() => handleAddTest()}
+          <View className="flex-row items-center justify-end mx-4 my-4 ">
+            <TouchableOpacity
+              className="flex-row items-center justify-end"
+              onPress={() => handleAddTest()}
+            >
+              <Text className="text-md bg-blue-900 rounded-md font-medium text-white p-2 ">
+                + Add Test
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View className="mt-8">
+            <View className="flex-row justify-between items-center px-4 pb-5 border-b-2 border-gray-300">
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab}
+                  onPress={() => setActiveTab(tab)}
+                  className={`border-b-2 font-medium ${
+                    activeTab === tab ? "border-blue-900" : "border-transparent"
+                  }`}
+                >
+                  <Text
+                    className={`text-lg font-medium ${
+                      activeTab === tab ? "text-black" : "text-gray-500"
+                    }`}
                   >
-                    <Text className="text-sm bg-blue-900 rounded-md text-white p-2 ">
-                      + Add Test
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              {/* TestList */}
-              <View className="flex-1 bg-gray-100 p-1">
-                <View className="mt-5">
-                  {/* <View className="flex-row justify-between items-center mx-4">
-                    <TouchableOpacity className="border-b-2 font-medium border-orange-400">
-                      <Text className="text-lg font-medium">All Tests</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="border-b-2 font-medium border-orange-400">
-                      <Text className="text-lg font-medium">Previous</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="border-b-2 font-medium border-orange-400">
-                      <Text className="text-lg font-medium">Upcoming</Text>
-                    </TouchableOpacity>
-                  </View> */}
-                  <View className="mt-5">
-                    <View className="flex-row justify-between items-center mx-4">
-                      {tabs.map((tab) => (
-                        <TouchableOpacity
-                          key={tab}
-                          onPress={() => setActiveTab(tab)}
-                          className={`border-b-2 font-medium ${
-                            activeTab === tab
-                              ? "border-orange-400"
-                              : "border-transparent"
-                          }`}
-                        >
-                          <Text
-                            className={`text-lg font-medium ${
-                              activeTab === tab
-                                ? "text-orange-400"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {tab}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-                <View className="mt-4">
-                  {tests.length > 0 ? (
-                    tests.map((test) => (
-                      <Swipeable
+                    {tab}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          <ScrollView scrollEnabled={true}>
+            {/* TestList */}
+            <View className="flex-1 bg-gray-100 p-1">
+              <View className="mt-4">
+                {tests.length > 0 ? (
+                  tests.map((test) => (
+                    <Swipeable
+                      key={test.id}
+                      renderRightActions={() => renderRightAction(test.id)}
+                      renderLeftActions={() => renderLeftAction(test.id)}
+                    >
+                      <View
                         key={test.id}
-                        renderRightActions={() => renderRightAction(test.id)}
-                        renderLeftActions={() => renderLeftAction(test.id)}
+                        className="border border-gray-300 mb-4 rounded-lg p-4 shadow-md lg:mx-5 mx-3 bg-gray-200 flex lg:justify-between justify-center mt-4"
                       >
-                        <View
-                          key={test.id}
-                          className="border border-gray-300 mb-4 rounded-lg p-4 shadow-md lg:mx-5 mx-3 bg-gray-200 flex lg:justify-between justify-center mt-4"
-                        >
-                          <View>
-                            <Text className="text-xl text-black font-semibold">
-                              {test.examName}
-                            </Text>
-                            <Text className="text-xs text-gray-400 font-medium mt-1">
-                              {test.examDate}
-                            </Text>
-                          </View>
-                          <View className="bg-white rounded-md mt-4 grid grid-cols-3">
-                            <View className="p-4 flex flex-row gap-5 justify-start  items-center border-gray-300">
-                              <View className="flex-row justify-start items-center gap-2">
-                                <Text className="text-md font-semibold text-gray-400">
-                                  Duration :
-                                </Text>
-                                <Text className="text-sm font-medium">
-                                  {test.duration}hr
-                                </Text>
-                              </View>
-                            </View>
-                            <View className="p-4 flex flex-row gap-5 justify-start  items-center border-gray-300">
-                              <View className="flex-row justify-start items-center gap-2">
-                                <Text className="text-md font-semibold  text-gray-400">
-                                  Attempts :
-                                </Text>
-                                <Text className="text-sm font-medium">
-                                  {test.attempts}
-                                </Text>
-                              </View>
-                            </View>
-                            <View className="p-4 flex flex-row gap-5 justify-start  items-center border-gray-300">
-                              <View className="flex-row justify-start items-center gap-2">
-                                <Text className="text-md font-semibold  text-gray-400">
-                                  Marks :
-                                </Text>
-                                <Text className="text-sm font-medium">100</Text>
-                              </View>
-                            </View>
-                          </View>
-                          {/* <View></View> */}
+                        <View>
+                          <Text className="text-xl text-black font-semibold">
+                            {test.examName}
+                          </Text>
+                          <Text className="text-xs text-gray-400 font-medium mt-1">
+                            {test.examDate}
+                          </Text>
                         </View>
-                      </Swipeable>
-                    ))
-                  ) : (
-                    <Text className="text-center text-gray-500 mt-5">
-                      No tests added
-                    </Text>
-                  )}
-                </View>
-              </View>
-              {/* Add Test Modal */}
-              <View>
-                {active && (
-                  <Modal transparent animationType="fade" visible={active}>
-                    <Pressable
-                      className="flex-1 bg-black/50"
-                      onPress={() => handleAddTest()}
-                    />
-                    <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg w-96 min-h-96 lg:w-full p-2">
-                      <View className="flex-row justify-center mt-4 items-center">
-                        <Text className="font-bold text-gray-700 text-2xl px-2">
-                          Exam Instruction
-                        </Text>
-                        {/* <TouchableOpacity
-                        className=" px-4 py-2 rounded-lg"
-                        onPress={() => handleAddTest()}
-                      >
-                        <Text className="font-bold">X</Text>
-                      </TouchableOpacity> */}
-                      </View>
-                      <View className="">
-                        <View className="p-3">
-                          <View className="grid grid-cols-2 gap-3">
-                            <View>
-                              <Text className="mt-3 text-base font-medium">
-                                Exam Name
-                                <Text className="text-red-500">*</Text>
+                        <View className="bg-white rounded-md mt-4 flex-row justify-start items-center">
+                          <View className="p-4 justify-start">
+                            <View className="flex-row justify-start items-center gap-2">
+                              <Text className="text-md font-semibold text-gray-400">
+                                Duration :
                               </Text>
-                              <TextInput
-                                className="mt-1 border border-gray-400 rounded-md p-2 px-3"
-                                placeholder="Enter here ..."
-                                placeholderTextColor={"gray"}
-                                value={examName}
-                                onChangeText={setExamName}
-                              />
-                            </View>
-
-                            <View>
-                              <Text className="mt-3 text-base font-medium">
-                                Exam Date
-                                <Text className="text-red-500">*</Text>
+                              <Text className="text-sm font-medium">
+                                {test.duration} hr
                               </Text>
-
-                              <TextInput
-                                className="mt-1 border border-gray-400 rounded-md p-2 px-3"
-                                placeholder="YYYY-MM-DD"
-                                placeholderTextColor={"gray"}
-                                value={examDate}
-                                onChangeText={setExamDate}
-                                onPress={() => setShowDatePicker(true)}
-                              />
-                              {showDatePicker && (
-                                <Modal
-                                  transparent
-                                  animationType="fade"
-                                  visible={showDatePicker}
-                                >
-                                  <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg w-96 min-h-96 lg:w-full p-2">
-                                    <DateTimePicker
-                                      mode="single"
-                                      date={examDate}
-                                      onChange={(params) => {
-                                        console.log("params", params);
-                                        setExamDate(params.date);
-                                        setShowDatePicker(false);
-                                      }}
-                                    />
-                                  </View>
-                                </Modal>
-                              )}
-                            </View>
-                            <View>
-                              <Text className="mt-3 text-base font-medium">
-                                Duration <Text className="text-red-500">*</Text>
-                              </Text>
-                              <TextInput
-                                className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
-                                placeholder="1 hour 30 minutes"
-                                placeholderTextColor={"gray"}
-                                value={duration}
-                                onChangeText={setDuration}
-                                maxLength={3}
-                              />
-                            </View>
-                            <View>
-                              <Text className="mt-3 text-base font-medium">
-                                Attempts <Text className="text-red-500">*</Text>
-                              </Text>
-                              <TextInput
-                                className="mt-1 border border-gray-400 rounded-md p-2 px-3"
-                                placeholder="3"
-                                placeholderTextColor={"gray"}
-                                value={attempts}
-                                onChangeText={setAttempts}
-                                maxLength={2}
-                              />
                             </View>
                           </View>
-                          <TouchableOpacity className="flex-row justify-end items-center gap-2 mt-16">
-                            <Link
-                              className="font-medium text-lg text-white bg-blue-700 py-1.5 px-5 rounded-lg "
-                              onPress={() => next()}
-                              href="/Question"
-                            >
-                              Next
-                            </Link>
-                          </TouchableOpacity>
+                          <View className="p-4 justify-start">
+                            <View className="flex-row justify-start items-center gap-2">
+                              <Text className="text-md font-semibold  text-gray-400">
+                                Attempts :
+                              </Text>
+                              <Text className="text-sm font-medium">
+                                {test.attempts}
+                              </Text>
+                            </View>
+                          </View>
+                          <View className="p-4 justify-start">
+                            <View className="flex-row justify-start items-center gap-2">
+                              <Text className="text-md font-semibold  text-gray-400">
+                                Marks :
+                              </Text>
+                              <Text className="text-sm font-medium">100</Text>
+                            </View>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  </Modal>
+                    </Swipeable>
+                  ))
+                ) : (
+                  <Text className="text-center text-gray-500 mt-5">
+                    No tests added
+                  </Text>
                 )}
               </View>
+            </View>
+            {/* Add Test Modal */}
+            <View>
+              {active && (
+                <Modal transparent animationType="fade" visible={active}>
+                  <Pressable
+                    className="flex-1 bg-black/50"
+                    onPress={() => handleAddTest()}
+                  />
+                  <View className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg w-96 min-h-96 lg:w-full p-2">
+                    <View className="flex-row justify-center mt-4 items-center">
+                      <Text className="font-bold text-gray-700 text-2xl px-2">
+                        Exam Instruction
+                      </Text>
+                    </View>
+                    <View className="">
+                      <View className="p-3">
+                        <View className="gap-3">
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Exam Name
+                              <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                              placeholder="Enter here ..."
+                              placeholderTextColor={"gray"}
+                              value={examName}
+                              inputMode="text"
+                              onChangeText={setExamName}
+                            />
+                          </View>
+
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Exam Date
+                              <Text className="text-red-500">*</Text>
+                            </Text>
+
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                              placeholder="YYYY-MM-DD"
+                              placeholderTextColor={"gray"}
+                              value={
+                                typeof examDate === "string"
+                                  ? examDate
+                                  : examDate.format("YYYY-MM-DD")
+                              }
+                              onChangeText={setExamDate}
+                              onPress={() => setShowDatePicker(true)}
+                            />
+                            {showDatePicker && (
+                              <Modal
+                                transparent
+                                animationType="fade"
+                                visible={showDatePicker}
+                              >
+                                <View className="absolute top-1/2 left-1/2 -translate-x-36 -translate-y-8 bg-white shadow-lg rounded-lg w-72 lg:w-96  p-2">
+                                  <DateTimePicker
+                                    mode="single"
+                                    date={examDate}
+                                    onChange={(params) => {
+                                      console.log("params", params);
+                                      setExamDate(params.date);
+                                      setShowDatePicker(false);
+                                    }}
+                                    height={200}
+                                  />
+                                </View>
+                              </Modal>
+                            )}
+                          </View>
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Duration <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3 "
+                              placeholder="1 hour 30 minutes"
+                              placeholderTextColor={"gray"}
+                              value={duration}
+                              inputMode="numeric"
+                              onChangeText={setDuration}
+                              maxLength={3}
+                            />
+                          </View>
+                          <View>
+                            <Text className="mt-3 text-base font-medium">
+                              Attempts <Text className="text-red-500">*</Text>
+                            </Text>
+                            <TextInput
+                              className="mt-1 border border-gray-400 rounded-md p-2 px-3"
+                              placeholder="3"
+                              placeholderTextColor={"gray"}
+                              value={attempts}
+                              inputMode="numeric"
+                              onChangeText={setAttempts}
+                              maxLength={2}
+                            />
+                          </View>
+                        </View>
+                        <TouchableOpacity className="flex-row justify-end items-center gap-2 mt-16">
+                          <Link
+                            className="font-medium text-lg text-white bg-blue-700 py-1.5 px-5 rounded-lg "
+                            onPress={() => next()}
+                            href="/Question"
+                          >
+                            Next
+                          </Link>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
+              )}
             </View>
           </ScrollView>
         </SafeAreaView>
